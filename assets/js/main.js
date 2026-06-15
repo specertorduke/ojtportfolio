@@ -115,10 +115,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Dynamic font size fitter — shrinks font if text overflows container
     function fitTextElements() {
         const subtitle = document.querySelector(".subtitle");
-        const introRole = document.querySelector(".intro-sub-item.role");
         const linesToFit = [...heroNameLines];
         if (subtitle) linesToFit.push(subtitle);
-        if (introRole) linesToFit.push(introRole);
 
         linesToFit.forEach(line => {
             if (!line) return;
@@ -280,24 +278,24 @@ document.addEventListener("DOMContentLoaded", () => {
             height = canvas.height = window.innerHeight;
         });
 
-        const overlay = document.querySelector(".intro-overlay");
-        if (overlay) {
-            overlay.addEventListener("mousemove", (e) => {
-                mouse.x = e.clientX;
-                mouse.y = e.clientY;
-            });
-            overlay.addEventListener("mouseleave", () => {
-                mouse.x = null;
-                mouse.y = null;
-            });
-        }
+        window.addEventListener("mousemove", (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        window.addEventListener("mouseout", () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        window.introCanvasPhase = 'normal';
+        window.sliderProgress = 0;
 
         class Particle {
             constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.6;
-                this.vy = (Math.random() - 0.5) * 0.6;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
                 this.radius = Math.random() * 2 + 1;
             }
 
@@ -305,17 +303,65 @@ document.addEventListener("DOMContentLoaded", () => {
                 this.x += this.vx;
                 this.y += this.vy;
 
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
+                // Bounce off edges correctly to avoid getting trapped
+                if (this.x <= 0) { this.x = 0; this.vx = Math.abs(this.vx); }
+                if (this.x >= width) { this.x = width; this.vx = -Math.abs(this.vx); }
+                if (this.y <= 0) { this.y = 0; this.vy = Math.abs(this.vy); }
+                if (this.y >= height) { this.y = height; this.vy = -Math.abs(this.vy); }
 
-                if (mouse.x !== null && mouse.y !== null) {
-                    const dx = this.x - mouse.x;
-                    const dy = this.y - mouse.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < mouse.radius) {
-                        const force = (mouse.radius - dist) / mouse.radius;
-                        this.x += (dx / dist) * force * 1.5;
-                        this.y += (dy / dist) * force * 1.5;
+                if (window.introCanvasPhase === 'normal') {
+                    // Apply friction if moving too fast (e.g. after explosion)
+                    const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                    if (speed > 1) {
+                        this.vx *= 0.94;
+                        this.vy *= 0.94;
+                    }
+
+                    // Pull towards center based on slider progress
+                    if (window.sliderProgress > 0) {
+                        const cx = width / 2;
+                        const cy = height / 2;
+                        const dx = cx - this.x;
+                        const dy = cy - this.y;
+                        this.vx += dx * 0.003 * window.sliderProgress;
+                        this.vy += dy * 0.003 * window.sliderProgress;
+                    }
+
+                    // Mouse repel
+                    if (mouse.x !== null && mouse.y !== null) {
+                        const dx = this.x - mouse.x;
+                        const dy = this.y - mouse.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < mouse.radius) {
+                            const force = (mouse.radius - dist) / mouse.radius;
+                            this.vx -= (dx / dist) * force * 1.5;
+                            this.vy -= (dy / dist) * force * 1.5;
+                        }
+                    }
+                } else if (window.introCanvasPhase === 'implode') {
+                    const cx = width / 2;
+                    const cy = height / 2;
+                    const dx = cx - this.x;
+                    const dy = cy - this.y;
+                    this.vx += dx * 0.035;
+                    this.vy += dy * 0.035;
+                    // Apply strong friction so they gather cleanly at center and do not slingshot past it
+                    this.vx *= 0.82;
+                    this.vy *= 0.82;
+                } else if (window.introCanvasPhase === 'explode') {
+                    const cx = width / 2;
+                    const cy = height / 2;
+                    const dx = this.x - cx;
+                    const dy = this.y - cy;
+                    // Authoritatively overwrite velocity for a consistent, smooth outward burst
+                    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
+                        const angle = Math.random() * Math.PI * 2;
+                        this.vx = Math.cos(angle) * 7;
+                        this.vy = Math.sin(angle) * 7;
+                    } else {
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        this.vx = (dx / dist) * 10;
+                        this.vy = (dy / dist) * 10;
                     }
                 }
             }
@@ -347,6 +393,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 p.update();
                 p.draw();
             });
+
+            // Reset explosion phase immediately after exactly one frame has processed it
+            if (window.introCanvasPhase === 'explode') {
+                window.introCanvasPhase = 'normal';
+            }
 
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
@@ -426,6 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
             sliderFill.style.width = (x + handleWidth / 2) + "px";
 
             const progress = (x - 3) / maxX;
+            window.sliderProgress = progress;
             sliderText.style.opacity = Math.max(0, 1 - progress * 1.5);
         };
 
@@ -448,11 +500,27 @@ document.addEventListener("DOMContentLoaded", () => {
                 sliderText.textContent = "ACCESS GRANTED";
                 sliderText.style.opacity = "1";
 
+                // Turn off slider gravity so explosion can happen freely
+                window.sliderProgress = 0;
+
+                // Canvas Implode/Explode effect
+                window.introCanvasPhase = 'implode';
+                setTimeout(() => {
+                    window.introCanvasPhase = 'explode';
+                }, 400); // Explode outward when core vanishes
+                // (It will automatically switch back to 'normal' internally inside Particle.update)
+
                 setTimeout(() => {
                     const exitTl = gsap.timeline({
                         onComplete: () => {
                             document.body.classList.remove("loading");
                             const overlay = document.querySelector(".intro-overlay");
+                            const canvasBg = document.querySelector(".intro-canvas");
+                            if (canvasBg && overlay) {
+                                // Transition the canvas to the main site background
+                                canvasBg.classList.add("main-bg");
+                                document.body.insertBefore(canvasBg, document.body.firstChild);
+                            }
                             if (overlay) overlay.remove();
                             runMainReveal();
                         }
@@ -486,11 +554,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     }, "-=0.7");
                 }, 600);
             } else {
-                sliderHandle.style.transition = "left 0.3s cubic-bezier(0.25, 1, 0.5, 1)";
-                sliderFill.style.transition = "width 0.3s cubic-bezier(0.25, 1, 0.5, 1)";
+                sliderHandle.style.transition = "left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+                sliderFill.style.transition = "width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
                 sliderHandle.style.left = "3px";
                 sliderFill.style.width = "0%";
                 sliderText.style.opacity = "1";
+                window.sliderProgress = 0; // Reset canvas particles
             }
         };
 
@@ -1710,122 +1779,5 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize state & listen for scaling changes
     updateCarousel();
     window.addEventListener('resize', updateCarousel);
-
-    // ==========================================
-    // INTERACTIVE CANVAS BACKGROUND (CONSTELLATION)
-    // ==========================================
-    function initInteractiveBackground() {
-        const canvas = document.getElementById('interactive-bg');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let particles = [];
-        
-        // Mouse tracking
-        let mouse = { x: -1000, y: -1000, radius: 150 };
-
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        });
-
-        window.addEventListener('mouseout', () => {
-            mouse.x = -1000;
-            mouse.y = -1000;
-        });
-
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 1;
-                this.vy = (Math.random() - 0.5) * 1;
-                this.size = Math.random() * 2 + 1;
-                this.color = Math.random() > 0.5 ? 'rgba(0, 240, 255, 0.7)' : 'rgba(162, 0, 255, 0.7)';
-            }
-
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Bounce off edges
-                if (this.x < 0 || this.x > width) this.vx = -this.vx;
-                if (this.y < 0 || this.y > height) this.vy = -this.vy;
-
-                // Mouse interaction - push particles away
-                let dx = mouse.x - this.x;
-                let dy = mouse.y - this.y;
-                let distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance < mouse.radius) {
-                    const forceDirectionX = dx / distance;
-                    const forceDirectionY = dy / distance;
-                    const force = (mouse.radius - distance) / mouse.radius;
-                    this.x -= forceDirectionX * force * 2;
-                    this.y -= forceDirectionY * force * 2;
-                }
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-            }
-        }
-
-        function initParticles() {
-            particles = [];
-            // Responsive particle count based on screen size
-            let numberOfParticles = Math.floor((width * height) / 18000); 
-            // Cap at 100 to prevent lag on huge screens
-            if(numberOfParticles > 100) numberOfParticles = 100;
-            
-            for (let i = 0; i < numberOfParticles; i++) {
-                particles.push(new Particle());
-            }
-        }
-        initParticles();
-        // Re-init on resize to keep density consistent
-        window.addEventListener('resize', initParticles);
-
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-            
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-                
-                // Draw connecting lines
-                for (let j = i; j < particles.length; j++) {
-                    let dx = particles[i].x - particles[j].x;
-                    let dy = particles[i].y - particles[j].y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < 140) {
-                        ctx.beginPath();
-                        // Fade line based on distance
-                        const opacity = 1 - (distance / 140);
-                        ctx.strokeStyle = `rgba(100, 150, 255, ${opacity * 0.3})`;
-                        ctx.lineWidth = 1;
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
-    }
-    
-    initInteractiveBackground();
 
 });

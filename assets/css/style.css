@@ -413,8 +413,10 @@ body.loading .scroll-indicator {
 }
 
 .intro-sub-item.role {
-    white-space: nowrap;
-    font-size: clamp(0.5rem, 2.2vw, 0.9rem);
+    white-space: normal;
+    text-align: center;
+    line-height: 1.4;
+    font-size: clamp(0.6rem, 3vw, 0.9rem);
 }
 
 .intro-sub-item.name {
@@ -1549,16 +1551,10 @@ body.portal-open main {
     position: relative;
 }
 
-/* Interactive Canvas Background */
-#interactive-bg {
+.intro-canvas.main-bg {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
     z-index: 0;
-    pointer-events: none;
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 main[data-scroll-container] {
