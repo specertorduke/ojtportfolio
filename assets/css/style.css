@@ -412,6 +412,11 @@ body.loading .scroll-indicator {
     margin: 0;
 }
 
+.intro-sub-item.role {
+    white-space: nowrap;
+    font-size: clamp(0.5rem, 2.2vw, 0.9rem);
+}
+
 .intro-sub-item.name {
     font-family: var(--font-heading);
     font-weight: 700;
@@ -806,11 +811,12 @@ body.loading .scroll-indicator {
 
 .subtitle {
     font-family: var(--font-body);
-    font-size: 1.2rem;
+    font-size: clamp(0.7rem, 2.5vw, 1.2rem);
     text-transform: uppercase;
     letter-spacing: 4px;
     color: #999;
     margin-bottom: 20px;
+    white-space: nowrap;
 }
 
 .hero-title {
@@ -1543,7 +1549,24 @@ body.portal-open main {
     position: relative;
 }
 
-/* Details Panel Styling */
+/* Interactive Canvas Background */
+#interactive-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+main[data-scroll-container] {
+    position: relative;
+    z-index: 1;
+}
+
+/* Base Utility Classes */
 .portal-header {
     display: flex;
     justify-content: space-between;

@@ -113,13 +113,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Dynamic font size fitter — shrinks font if text overflows container
-    function fitHeroTitle() {
-        const container = document.querySelector(".hero-content");
-        if (!container) return;
-        const cs = getComputedStyle(container);
-        const maxWidth = container.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    function fitTextElements() {
+        const subtitle = document.querySelector(".subtitle");
+        const introRole = document.querySelector(".intro-sub-item.role");
+        const linesToFit = [...heroNameLines];
+        if (subtitle) linesToFit.push(subtitle);
+        if (introRole) linesToFit.push(introRole);
 
-        heroNameLines.forEach(line => {
+        linesToFit.forEach(line => {
+            if (!line) return;
+            const container = line.closest(".hero-content, .intro-text") || line.parentElement;
+            if (!container) return;
+
+            const cs = getComputedStyle(container);
+            const padding = parseFloat(cs.paddingLeft || 0) + parseFloat(cs.paddingRight || 0);
+            let maxWidth = container.clientWidth - padding;
+            
+            // Failsafe for containers that don't have a strict width
+            const safeMaxWidth = window.innerWidth * 0.9;
+            if (maxWidth > safeMaxWidth || maxWidth === 0) maxWidth = safeMaxWidth;
+
             // Reset to CSS default
             line.style.fontSize = "";
             const text = line.textContent;
@@ -137,8 +150,8 @@ document.addEventListener("DOMContentLoaded", () => {
             let size = parseFloat(getComputedStyle(line).fontSize);
             measurer.style.fontSize = size + "px";
 
-            // Shrink until text fits
-            while (measurer.offsetWidth > maxWidth && size > 16) {
+            // Shrink until text fits (down to 8px if needed)
+            while (measurer.offsetWidth > maxWidth && size > 8) {
                 size -= 1;
                 measurer.style.fontSize = size + "px";
             }
@@ -148,8 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    fitHeroTitle();
-    window.addEventListener("resize", fitHeroTitle);
+    fitTextElements();
+    window.addEventListener("resize", fitTextElements);
 
     // Set initial states for main page elements to prevent flashing
     gsap.set(".navbar", { y: -30, opacity: 0 });
@@ -1659,5 +1672,122 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize state & listen for scaling changes
     updateCarousel();
     window.addEventListener('resize', updateCarousel);
+
+    // ==========================================
+    // INTERACTIVE CANVAS BACKGROUND (CONSTELLATION)
+    // ==========================================
+    function initInteractiveBackground() {
+        const canvas = document.getElementById('interactive-bg');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        
+        // Mouse tracking
+        let mouse = { x: -1000, y: -1000, radius: 150 };
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('mouseout', () => {
+            mouse.x = -1000;
+            mouse.y = -1000;
+        });
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = (Math.random() - 0.5) * 1;
+                this.size = Math.random() * 2 + 1;
+                this.color = Math.random() > 0.5 ? 'rgba(0, 240, 255, 0.7)' : 'rgba(162, 0, 255, 0.7)';
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bounce off edges
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+
+                // Mouse interaction - push particles away
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < mouse.radius) {
+                    const forceDirectionX = dx / distance;
+                    const forceDirectionY = dy / distance;
+                    const force = (mouse.radius - distance) / mouse.radius;
+                    this.x -= forceDirectionX * force * 2;
+                    this.y -= forceDirectionY * force * 2;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            // Responsive particle count based on screen size
+            let numberOfParticles = Math.floor((width * height) / 18000); 
+            // Cap at 100 to prevent lag on huge screens
+            if(numberOfParticles > 100) numberOfParticles = 100;
+            
+            for (let i = 0; i < numberOfParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+        // Re-init on resize to keep density consistent
+        window.addEventListener('resize', initParticles);
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                // Draw connecting lines
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 140) {
+                        ctx.beginPath();
+                        // Fade line based on distance
+                        const opacity = 1 - (distance / 140);
+                        ctx.strokeStyle = `rgba(100, 150, 255, ${opacity * 0.3})`;
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+    }
+    
+    initInteractiveBackground();
 
 });
