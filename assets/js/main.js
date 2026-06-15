@@ -1071,8 +1071,8 @@ document.addEventListener("DOMContentLoaded", () => {
             title: "PhishVote",
             role: "Lead Researcher",
             year: "2026",
-            desc: "An Adaptive Soft-Voting Ensemble of Tree-Based Classifiers for Phishing Website Detection. This research paper proposes an ensemble model combining multiple optimized tree-based machine learning classifiers (Random Forest, XGBoost, LightGBM) to detect phishing URLs with high accuracy based on lexical and structural features.",
-            tags: ["Machine Learning", "Python", "Scikit-Learn", "Ensemble Methods", "Research"],
+            desc: "Built a phishing detection browser extension utilizing ensemble machine learning models to identify malicious sites. Implemented weighted soft voting to combine model predictions and improve overall detection performance. Evaluated using Accuracy, Precision, Recall, F1-Score, ROC-AUC, and Precision-Recall metrics. Applied machine learning concepts related to classification, ensemble learning, feature engineering, and cybersecurity-focused threat detection.",
+            tags: ["Python", "Scikit-Learn", "XGBoost", "CatBoost", "Machine Learning"],
             paperLink: "https://drive.google.com/file/d/1_wBtc5cBbFXaeuClkTXrShdQQcsFwYkr/view?usp=sharing",
             codeLink: "https://github.com/specertorduke/PhishVote/tree/main",
             slides: [
@@ -1100,10 +1100,10 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         furrytails: {
             title: "FurryTails",
-            role: "Lead Developer",
+            role: "Full-Stack Developer",
             year: "2025",
-            desc: "A comprehensive Pet Boarding & Veterinary Services Management System designed to automate clinic appointments, lodging reservations, and billing workflows. Features secure Google OAuth integration, client-side scheduling with real-time 1-hour slot availability, capacity-checked boarding, and polymorphic payment verification.",
-            tags: ["PHP / Laravel", "MySQL", "JavaScript", "HTML/CSS", "TailwindCSS"],
+            desc: "A web-based management system for pet grooming and boarding reservations. Designed and implemented modules for user, pet, appointment, payment, service, and activity log management. Built CRUD functionalities, booking workflows, payment tracking, and role-based access controls using PHP, MySQL, HTML, CSS, and Bootstrap.",
+            tags: ["PHP / Laravel", "MySQL", "JavaScript", "HTML/CSS", "Bootstrap"],
             codeLink: "https://github.com/specertorduke/furrytails_project",
             slides: [
                 {
@@ -1165,9 +1165,9 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         insightful: {
             title: "INSIGHTFUL",
-            role: "Lead Developer",
+            role: "Web Developer",
             year: "2024",
-            desc: "A voice-first accessibility app that speaks everything it sees. Designed for blind and visually impaired users, every detection result, mode switch, and instruction is announced aloud through the Web Speech API — the user never needs to read the screen. Uses TensorFlow.js for object detection, Tesseract.js for OCR text reading, and HSL-based color identification, all running 100% client-side with haptic vibration, audio cues, and full ARIA accessibility.",
+            desc: "A voice-first accessibility app that speaks everything it sees. Built a browser-based computer vision application for real-time object detection and text recognition. Implemented TensorFlow.js and COCO-SSD models to analyze live camera feeds, integrated Tesseract.js OCR and color detection features with accessibility-focused voice feedback through the Web Speech API.",
             tags: ["TensorFlow.js", "Tesseract.js", "Web Speech API", "JavaScript", "HTML/CSS"],
             codeLink: "https://github.com/specertorduke/insightful",
             slides: [
@@ -1198,11 +1198,41 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             ]
         },
+        pharmacytriage: {
+            title: "Pharmacy Triage",
+            role: "Lead Data Analyst & Simulation Engineer",
+            year: "2026",
+            desc: "Built a discrete-event simulation model analyzing patient flow data to optimize complex hospital pharmacy outpatient bottlenecks using Rockwell Arena. Performed statistical distribution and exploratory data analysis using industry-standard analytics workflows. Evaluated statistical variance using Wait Time, Value-Added Time, Transfer Time, and Total Time-in-System. Applied data analysis concepts related to descriptive statistics, trend visualization, queueing theory, and bottleneck detection.",
+            tags: ["Rockwell Arena", "Python", "Matplotlib", "Pandas", "Data Analysis"],
+            paperLink: "https://drive.google.com/file/d/1FBf05QALsgUDhYuSLVMW9MsMtSPuGmCb/view?usp=sharing",
+            slides: [
+                {
+                    imgSrc: "assets/img/Pharmacy Triage images/Arena Logic Flowchart.png",
+                    caption: "Arena Logic Flowchart: The logical structure relies on Rockwell Arena modules representing the Triage Desk, where patients are dynamically separated into Express or Regular streams based on prescription size using a 2-way by Condition logic.",
+                    overlayText: ""
+                },
+                {
+                    imgSrc: "assets/img/Pharmacy Triage images/Model Design Layout.png",
+                    caption: "Model Design Layout: Visualizing the physical flow of outpatients through the pharmacy. Patients are actively triaged immediately upon arrival—those with 1-2 items are routed to a dedicated Express Lane, while complex orders of 3+ items are pooled into Regular lines.",
+                    overlayText: ""
+                },
+                {
+                    imgSrc: "assets/img/Pharmacy Triage images/System-Wide Performance Metrics.png",
+                    caption: "System-Wide Performance Comparison: Empirical results derived from 100 simulation replications showing a massive 78.7% reduction in average wait times, dropping from 12.70 minutes in the Baseline FIFO model to just 2.70 minutes in the Proposed SPT model.",
+                    overlayText: ""
+                },
+                {
+                    imgSrc: "assets/img/Pharmacy Triage images/Queue-Specific Wait Time Distribution.png",
+                    caption: "Average Wait Time by Queue Category: The queue dynamics demonstrate the success of the Shortest Processing Time triage logic. The Express Queue achieved a wait time of 0.64 minutes, drastically lowering the overall lobby density.",
+                    overlayText: ""
+                }
+            ]
+        },
         spaswab: {
             title: "SPASWAB",
-            role: "Programmer",
+            role: "Researcher & Programmer",
             year: "2023",
-            desc: "A Solar-Powered Arduino-Based Smart Waste Bin capable of automatically segregating plastic, metal, and non-plastic/non-metal waste using capacitive proximity sensors (LJC18A3-H/Z/BY), inductive proximity sensors, and ultrasonic ranging modules (HC-SR04). Powered entirely by solar energy via a solar panel and charge controller, the prototype achieved 100% segregation accuracy for plastics, 66.67% for metals, and 93.57% for non-plastic/non-metal waste — with a statistically significant p-value of 0.003.",
+            desc: "Integrated Arduino Uno with capacitive, inductive, and ultrasonic sensors for material detection. Implemented C++ control logic to classify plastic, metal, and non-recyclable waste categories. Conducted experimental evaluation and statistical analysis, achieving 100% plastic accuracy, 66.67% for metals, and 93.57% for others — with a statistically significant p-value of 0.003. Powered entirely by solar energy.",
             tags: ["Arduino (C++)", "IoT Sensors", "HC-SR04 Ultrasonic", "Solar Energy", "Experimental Research"],
             slides: [
                 {
