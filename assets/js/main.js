@@ -114,9 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Dynamic font size fitter — shrinks font if text overflows container
     function fitTextElements() {
-        const subtitle = document.querySelector(".subtitle");
         const linesToFit = [...heroNameLines];
-        if (subtitle) linesToFit.push(subtitle);
 
         linesToFit.forEach(line => {
             if (!line) return;
@@ -764,8 +762,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }, {
-        threshold: 0.3,
-        rootMargin: "-10% 0px -10% 0px"
+        threshold: 0,
+        rootMargin: "-40% 0px -50% 0px"
     });
 
     sections.forEach(section => scrollSpyObserver.observe(section));

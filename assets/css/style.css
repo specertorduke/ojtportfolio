@@ -818,7 +818,8 @@ body.loading .scroll-indicator {
     letter-spacing: 4px;
     color: #999;
     margin-bottom: 20px;
-    white-space: nowrap;
+    white-space: normal;
+    line-height: 1.5;
 }
 
 .hero-title {
