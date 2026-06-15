@@ -533,11 +533,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         ease: "power2.out"
                     });
 
+                    // Cool cyber-implode fade out for the core
                     exitTl.to(".intro-core", {
-                        scale: 12,
+                        scale: 0.3,
+                        rotation: 90,
                         opacity: 0,
-                        duration: 1.4,
-                        ease: "power4.inOut"
+                        duration: 0.7,
+                        ease: "back.in(1.5)"
                     }, "-=0.1");
 
                     exitTl.to(".intro-text", {
