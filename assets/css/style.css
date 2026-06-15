@@ -1777,12 +1777,52 @@ main[data-scroll-container] {
     bottom: 12px;
     left: 15px;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 0.72rem;
-    color: rgba(0, 240, 255, 0.65);
+    font-size: 0.85rem;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 240, 255, 0.3);
     z-index: 4;
     line-height: 1.4;
-    pointer-events: none;
-    text-shadow: 0 0 3px rgba(0, 240, 255, 0.3);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    max-width: 80%;
+}
+
+.tts-btn {
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.5);
+    color: var(--accent-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.tts-btn:hover {
+    background: rgba(0, 240, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.tts-btn.playing {
+    background: var(--accent-color);
+    color: #000;
+    animation: pulseTTS 1s infinite;
+}
+
+@keyframes pulseTTS {
+    0% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 240, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0); }
 }
 
 .slideshow-caption {

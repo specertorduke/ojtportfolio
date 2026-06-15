@@ -1563,18 +1563,56 @@ document.addEventListener("DOMContentLoaded", () => {
                 mediaContent = getBlueprintSVG(projectId, idx);
             }
 
+            let overlayHTML = '';
+            if (slide.overlayText) {
+                // Clean the text to remove the mock "Voice:" string for the actual spoken text
+                let cleanText = slide.overlayText.replace('🔊 Voice: "', '').replace(/"$/, '');
+                if (cleanText === slide.overlayText) cleanText = slide.overlayText; // fallback if no quotes
+                
+                overlayHTML = `
+                <div class="blueprint-overlay">
+                    <button class="tts-btn" aria-label="Play Voice" data-text="${cleanText.replace(/"/g, '&quot;')}">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                    <span>${cleanText.replace(/\\n/g, '<br>')}</span>
+                </div>`;
+            }
+
             const slideHTML = `
                 <div class="blueprint-mockup">
                     <div class="blueprint-grid"></div>
                     <div class="blueprint-scanline"></div>
                     ${mediaContent}
-                    <div class="blueprint-overlay">${slide.overlayText.replace(/\\n/g, '<br>')}</div>
+                    ${overlayHTML}
                 </div>
                 <div class="slideshow-caption">${slide.caption}</div>
             `;
 
             slideDiv.innerHTML = slideHTML;
             track.appendChild(slideDiv);
+        });
+
+        // Add delegated event listener for TTS buttons
+        track.addEventListener('click', (e) => {
+            const btn = e.target.closest('.tts-btn');
+            if (btn) {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+                const textToSpeak = btn.getAttribute('data-text');
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.rate = 1.0;
+                utterance.pitch = 1.1;
+                // Try to use a natural English voice if available
+                const voices = window.speechSynthesis.getVoices();
+                const englishVoice = voices.find(v => v.lang.startsWith('en-US') && v.name.includes('Google'));
+                if (englishVoice) utterance.voice = englishVoice;
+                
+                window.speechSynthesis.speak(utterance);
+                
+                // Add temporary active class for visual feedback
+                btn.classList.add('playing');
+                utterance.onend = () => btn.classList.remove('playing');
+            }
         });
 
         // Populate dots
