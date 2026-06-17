@@ -1528,14 +1528,14 @@ main[data-scroll-container] {
 
 .portal-title {
     font-family: var(--font-heading);
-    font-size: 3.5rem;
+    font-size: clamp(2rem, 5vw, 3.5rem);
     font-weight: 800;
     text-transform: uppercase;
     line-height: 1.1;
-    white-space: nowrap;
-    overflow: visible;
+    white-space: normal;
     color: var(--text-color);
     word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .portal-divider {
@@ -1567,19 +1567,32 @@ main[data-scroll-container] {
 }
 
 .portal-tech-section .tags {
-    gap: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
 }
 
 .portal-tech-section .tag {
-    padding: 10px 20px;
-    font-size: 0.9rem;
-    background: rgba(0, 240, 255, 0.02);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-color);
+    background: rgba(0, 119, 182, 0.05);
+    border: 1px solid rgba(0, 119, 182, 0.15);
+    border-radius: 20px;
+    white-space: nowrap;
+    transition: all 0.25s ease;
 }
 
 .portal-tech-section .tag:hover {
-    background: rgba(0, 240, 255, 0.15);
-    color: var(--text-color);
+    background: rgba(0, 119, 182, 0.15);
     border-color: var(--accent-color);
+    color: var(--accent-color);
+    transform: translateY(-1px);
 }
 
 .portal-btn {
@@ -1942,6 +1955,7 @@ main[data-scroll-container] {
     .portal-container {
         flex-direction: column;
         overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .portal-content {
@@ -2190,9 +2204,9 @@ main[data-scroll-container] {
         padding: 5px 8px;
     }
 
-    .cursor,
-    .cursor-follower {
-        display: none;
+    .cursor-dot,
+    .cursor-outline {
+        display: none !important;
         /* Hide custom cursor on mobile */
     }
 
