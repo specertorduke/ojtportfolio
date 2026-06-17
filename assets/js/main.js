@@ -157,7 +157,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    fitTextElements();
+    document.fonts.ready.then(() => {
+        fitTextElements();
+    });
     window.addEventListener("resize", fitTextElements);
 
     // Set initial states for main page elements to prevent flashing
