@@ -23,75 +23,42 @@
 </head>
 
 <body class="loading">
-    <!-- Custom Cursor -->
-    <div class="cursor"></div>
-    <div class="cursor-follower"></div>
+    <!-- Dynamic Mesh Background for Glassmorphism -->
+    <div class="mesh-background">
+        <div class="mesh-blob blob-1"></div>
+        <div class="mesh-blob blob-2"></div>
+        <div class="mesh-blob blob-3"></div>
+    </div>
 
-    <!-- Intro Overlay -->
+    <!-- Custom Cursor & Reveal -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+    <div class="cursor-image-reveal">
+        <img id="reveal-img" src="" alt="Project Preview">
+    </div>
+
+    <!-- Floating Glass Certificate Preview Card -->
+    <div id="cert-preview" class="cert-preview">
+        <div class="cert-card-shine"></div>
+        <div class="cert-card-header">
+            <i class="fa-solid fa-award cert-card-icon" id="cert-card-icon"></i>
+            <span class="cert-card-year" id="cert-card-year">2025</span>
+        </div>
+        <div class="cert-card-body">
+            <h4 class="cert-card-title" id="cert-card-title">IT Specialist in Network Security</h4>
+            <p class="cert-card-issuer" id="cert-card-issuer">Certiport</p>
+        </div>
+        <div class="cert-card-footer">
+            <span class="cert-card-badge">VERIFIED CREDENTIAL</span>
+        </div>
+    </div>
+
+    <!-- Intro Preloader -->
     <div class="intro-overlay">
-        <div class="intro-background-grid"></div>
-        <canvas class="intro-canvas"></canvas>
-        <div class="intro-content">
-            <div class="intro-core-wrap">
-                <div class="intro-particle"></div>
-                <div class="intro-core">
-                    <svg class="intro-hud-svg" viewBox="0 0 200 200">
-                        <!-- Background Grid -->
-                        <circle cx="100" cy="100" r="95" stroke="rgba(0, 240, 255, 0.08)" stroke-width="1"
-                            fill="none" />
-                        <circle cx="100" cy="100" r="75" stroke="rgba(0, 240, 255, 0.05)" stroke-width="1"
-                            stroke-dasharray="4 4" fill="none" />
-                        <circle cx="100" cy="100" r="55" stroke="rgba(0, 240, 255, 0.08)" stroke-width="1"
-                            fill="none" />
-
-                        <!-- Radar Sweep Line -->
-                        <line x1="100" y1="100" x2="100" y2="5" stroke="rgba(0, 240, 255, 0.35)" stroke-width="1.5"
-                            class="hud-sweep" />
-
-                        <!-- Rotating Concentric HUD Elements -->
-                        <circle cx="100" cy="100" r="85" stroke="var(--accent-color)" stroke-width="1.5"
-                            stroke-dasharray="120 40 10 30" fill="none" class="hud-ring-cw" />
-                        <circle cx="100" cy="100" r="65" stroke="var(--accent-secondary)" stroke-width="1"
-                            stroke-dasharray="50 150" fill="none" class="hud-ring-ccw" />
-                        <circle cx="100" cy="100" r="45" stroke="var(--accent-color)" stroke-width="1"
-                            stroke-dasharray="5 5" fill="none" class="hud-ring-cw-fast" />
-
-                        <!-- Crosshair & Center Glowing Node -->
-                        <path d="M 100 80 L 100 90 M 100 110 L 100 120 M 80 100 L 90 100 M 110 100 L 120 100"
-                            stroke="rgba(0, 240, 255, 0.4)" stroke-width="1" />
-                        <circle cx="100" cy="100" r="8" fill="var(--accent-color)" class="hud-center-node" />
-
-                        <!-- Data Dots / Nodes -->
-                        <circle cx="50" cy="70" r="3" fill="var(--accent-color)" class="hud-node-pulse" />
-                        <line x1="50" y1="70" x2="70" y2="70" stroke="rgba(0, 240, 255, 0.2)" stroke-width="0.5" />
-
-                        <circle cx="150" cy="130" r="3" fill="var(--accent-secondary)" class="hud-node-pulse-delayed" />
-                        <line x1="150" y1="130" x2="130" y2="130" stroke="rgba(157, 78, 221, 0.2)" stroke-width="0.5" />
-                    </svg>
-                </div>
-            </div>
-
-            <div class="intro-text">
-                <h1 class="intro-title">hello !</h1>
-                <div class="intro-divider"></div>
-                <div class="intro-subtitle-container">
-                    <p class="intro-sub-item name">I AM ZANDER :></p>
-                    <p class="intro-sub-item role">Aspiring Software Developer | Web Developer | Data Analyst</p>
-                </div>
-            </div>
-
-            <div class="intro-trigger-container">
-                <div class="intro-slider-container">
-                    <div class="intro-slider-track">
-                        <span class="intro-slider-text">SLIDE TO DECRYPT CORE</span>
-                        <div class="intro-slider-fill"></div>
-                        <div class="intro-slider-handle magnetic" data-strength="15">
-                            <i class="fa-solid fa-angles-right handle-icon"></i>
-                            <i class="fa-solid fa-fingerprint success-icon" style="display: none;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="intro-loader-content">
+            <div class="intro-counter">0%</div>
+            <div class="intro-name">Z. DUHAYLUNGSOD</div>
+            <div class="intro-progress-bar"></div>
         </div>
     </div>
 
@@ -101,10 +68,9 @@
             <a href="#home">ZD.</a>
         </div>
         <div class="nav-links">
-            <a href="#about" class="nav-link magnetic hover-target" data-strength="20">About</a>
-            <a href="#skills" class="nav-link magnetic hover-target" data-strength="20">Skills</a>
-            <a href="#projects" class="nav-link magnetic hover-target" data-strength="20">Projects</a>
-            <a href="#contact" class="nav-link magnetic hover-target" data-strength="20">Contact</a>
+            <a href="#about" class="nav-link magnetic hover-target" data-strength="20"><span>About</span></a>
+            <a href="#projects" class="nav-link magnetic hover-target" data-strength="20"><span>Projects</span></a>
+            <a href="#contact" class="nav-link magnetic hover-target" data-strength="20"><span>Contact</span></a>
         </div>
     </nav>
 
@@ -113,7 +79,7 @@
         <section id="home" class="hero section" data-scroll-section>
             <div class="hero-content">
                 <div class="reveal-text">
-                    <p class="subtitle">Aspiring Software Developer | Web Developer | Data Analyst</p>
+                    <p class="subtitle">Creative Developer — System Engineer</p>
                 </div>
                 <div class="reveal-text">
                     <h1 class="hero-title">
@@ -122,12 +88,11 @@
                     </h1>
                 </div>
                 <div class="reveal-text">
-                    <p class="hero-desc">Seeking an OJT opportunity to apply software development, data analysis,
-                        and problem-solving skills to real-world challenges.</p>
+                    <p class="hero-desc">Engineering resilient systems and crafting bespoke digital experiences. Based in Davao City.</p>
                 </div>
                 <div class="hero-cta reveal-text">
                     <a href="#projects" class="btn btn-primary magnetic hover-target" data-strength="40">
-                        <span class="btn-text">View Work</span>
+                        <span class="btn-text">Explore Archive</span>
                     </a>
                 </div>
             </div>
@@ -163,160 +128,64 @@
             </div>
         </div>
 
-        <!-- About Section -->
-        <section id="about" class="about section" data-scroll-section>
+        <!-- Profile Section -->
+        <section id="about" class="profile section" data-scroll-section>
             <div class="container">
-                <div class="section-header reveal-up">
-                    <h2 class="section-title">About Me</h2>
-                    <div class="line"></div>
-                </div>
-                <div class="about-grid">
-                    <div class="about-text reveal-up">
-                        <p class="large-text">Detail-oriented Computer Science student with hands-on experience in
-                            web development, database management, software development, and data analysis.</p>
-                        <p>Currently studying at the <strong>University of Mindanao</strong>, pursuing a BS in
-                            Computer Science. My coursework spans web development, database systems, software
-                            engineering, cybersecurity, machine learning, data structures, and simulation & modeling.
-                        </p>
-
-                        <div class="awards-box">
-                            <h3><i class="fa-solid fa-trophy"></i> Recognitions</h3>
-                            <ul>
-                                <li>Top 2 - Dean's List, 2nd Year (Jul 2025)</li>
-                                <li>Top 1 - Dean's List, 1st Year (May 2024)</li>
-                                <li>Best Capstone Project Presenter (2023)</li>
-                                <li>Best Robotic Prototype (2023)</li>
-                            </ul>
-                        </div>
-
-                        <div class="awards-box" style="margin-top: 30px;">
-                            <h3><i class="fa-solid fa-graduation-cap"></i> Scholarships</h3>
-                            <ul class="scholarships-list">
-                                <li class="scholarship-item">
-                                    <img src="assets/img/ched-logo.png" alt="CHED Logo" class="institution-logo">
-                                    <div class="scholarship-info">
-                                        <span class="scholarship-title">CHED - FPESFA Full Merit Scholar</span>
-                                        <span class="scholarship-issuer">Commission on Higher Education</span>
-                                    </div>
-                                </li>
-                                <li class="scholarship-item">
-                                    <img src="assets/img/um-logo.png" alt="University of Mindanao Logo"
-                                        class="institution-logo">
-                                    <div class="scholarship-info">
-                                        <span class="scholarship-title">UM Honor Society Scholar (Category A)</span>
-                                        <span class="scholarship-issuer">University of Mindanao</span>
-                                    </div>
-                                </li>
-                                <li class="scholarship-item">
-                                    <img src="assets/img/davao-city-logo.png" alt="City Government of Davao Logo"
-                                        class="institution-logo">
-                                    <div class="scholarship-info">
-                                        <span class="scholarship-title">Former EBSU - STEP Scholar (Category A)</span>
-                                        <span class="scholarship-issuer">City Government of Davao</span>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
+                <div class="profile-grid">
+                    <div class="profile-left sticky-col reveal-up">
+                        <h2 class="editorial-title">PROFILE.</h2>
+                        <p class="editorial-desc">Detail-oriented Computer Science student with hands-on experience in web development, database management, software engineering, and data analysis.</p>
+                        <p class="editorial-desc">Currently pursuing my BS in Computer Science at the University of Mindanao. Seeking an OJT opportunity to engineer resilient systems and craft bespoke digital experiences.</p>
                     </div>
-                    <div class="about-details reveal-up">
-                        <div class="detail-item education-item">
-                            <img src="assets/img/um-logo.png" alt="University of Mindanao Logo" class="detail-logo">
-                            <div class="detail-text">
-                                <span class="detail-label">Education</span>
-                                <span class="detail-value">BS in Computer Science<br>University of Mindanao<br>(Aug 2023
-                                    - Present, Expected 2027)</span>
+                    
+                    <div class="profile-right reveal-up">
+                        <div class="scrub-reveal-text" id="scrub-text">
+                            I specialize in bridging the gap between elegant design and complex system architecture. With a relentless focus on precision, I architect solutions that are not only performant and secure, but also deeply engaging.
+                        </div>
+                        <div class="editorial-list">
+                            <div class="list-item">
+                                <span class="list-label">Capabilities</span>
+                                <span class="list-value">Full-Stack Development, UI/UX Design, Data Analysis, Cybersecurity, Machine Learning</span>
+                            </div>
+                            <div class="list-item">
+                                <span class="list-label">Core Tech</span>
+                                <span class="list-value">Python, PHP/Laravel, JavaScript, Java, C#, MySQL, Rockwell Arena</span>
+                            </div>
+                            <div class="list-item">
+                                <span class="list-label">Education</span>
+                                <span class="list-value">BS in Computer Science<br>University of Mindanao (2023 - 2027)</span>
+                            </div>
+                            <div class="list-item">
+                                <span class="list-label">Location</span>
+                                <span class="list-value">Davao City, Philippines</span>
                             </div>
                         </div>
-                        <div class="detail-item" style="margin-top: 40px;">
-                            <span class="detail-label">Location</span>
-                            <span class="detail-value">Davao City, Philippines</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Skills Section -->
-        <section id="skills" class="skills section" data-scroll-section>
-            <div class="container">
-                <div class="section-header reveal-up">
-                    <h2 class="section-title">Expertise</h2>
-                    <div class="line"></div>
-                </div>
-
-                <div class="skills-wrapper">
-                    <!-- Technical Skills -->
-                    <div class="skill-category reveal-up">
-                        <h3>Tech Stack & Tools</h3>
-                        <div class="tags">
-                            <span class="tag hover-target">Python</span>
-                            <span class="tag hover-target">PHP / Laravel</span>
-                            <span class="tag hover-target">JavaScript</span>
-                            <span class="tag hover-target">Java</span>
-                            <span class="tag hover-target">C#</span>
-                            <span class="tag hover-target">HTML/CSS</span>
-                            <span class="tag hover-target">MySQL</span>
-                            <span class="tag hover-target">Git & GitHub</span>
-                            <span class="tag hover-target">VS Code</span>
-                            <span class="tag hover-target">Figma</span>
-                            <span class="tag hover-target">Rockwell Arena</span>
-                        </div>
-                    </div>
-
-                    <!-- Core Competencies -->
-                    <div class="skill-category reveal-up">
-                        <h3>Core Competencies</h3>
-                        <div class="tags">
-                            <span class="tag hover-target">UI/UX Design</span>
-                            <span class="tag hover-target">Database Design</span>
-                            <span class="tag hover-target">Data Analysis</span>
-                            <span class="tag hover-target">Software Testing & Debugging</span>
-                            <span class="tag hover-target">Cybersecurity</span>
-                            <span class="tag hover-target">Machine Learning</span>
-                            <span class="tag hover-target">Version Control</span>
-                            <span class="tag hover-target">Technical Documentation</span>
-                            <span class="tag hover-target">Team Collaboration</span>
-                            <span class="tag hover-target">AI-Assisted Development</span>
-                        </div>
                     </div>
                 </div>
 
-                <!-- Certifications Wrapper -->
-                <div class="certifications reveal-up mt-5">
-                    <h3>Certifications & Diplomas</h3>
-                    <div class="cert-list">
-                        <div class="cert-item hover-target">
-                            <div class="cert-year">2026</div>
-                            <div class="cert-info">IT Specialist in Network Security <span>Certiport</span></div>
-                        </div>
-                        <div class="cert-item hover-target">
-                            <div class="cert-year">2025</div>
-                            <div class="cert-info">IT Specialist in Databases <span>Certiport</span></div>
-                        </div>
-                        <div class="cert-item hover-target">
-                            <div class="cert-year">2025</div>
-                            <div class="cert-info">Diploma in Machine Learning with Python <span>Alison</span></div>
-                        </div>
-                        <div class="cert-item hover-target">
-                            <div class="cert-year">2024</div>
-                            <div class="cert-info">IT Specialist in Java <span>Certiport</span></div>
-                        </div>
-                        <div class="cert-item hover-target">
-                            <div class="cert-year">2024</div>
-                            <div class="cert-info">Diploma in Website Development <span>Alison</span></div>
-                        </div>
-                        <div class="cert-item hover-target">
-                            <div class="cert-year">2024</div>
-                            <div class="cert-info">Diploma in Programming using C# <span>Alison</span></div>
-                        </div>
-                        <div class="cert-item hover-target">
-                            <div class="cert-year">2023</div>
-                            <div class="cert-info">Diploma in Python Programming <span>Alison</span></div>
-                        </div>
-                        <div class="cert-item hover-target">
-                            <div class="cert-year">2023</div>
-                            <div class="cert-info">Diploma in IT Management <span>Alison</span></div>
-                        </div>
+                <div class="honors-grid mt-5">
+                    <div class="honors-col reveal-up">
+                        <h3 class="editorial-subtitle">Honors & Awards</h3>
+                        <ul class="clean-list">
+                            <li data-title="Top 2 - Dean's List, 2nd Year" data-issuer="University of Mindanao" data-year="2025" data-icon="fa-trophy"><span>2025</span> Top 2 - Dean's List, 2nd Year</li>
+                            <li data-title="Top 1 - Dean's List, 1st Year" data-issuer="University of Mindanao" data-year="2024" data-icon="fa-trophy"><span>2024</span> Top 1 - Dean's List, 1st Year</li>
+                            <li data-title="CHED - FPESFA Full Merit Scholar" data-issuer="Commission on Higher Education" data-year="Scholarship" data-icon="fa-award"><span>Award</span> CHED - FPESFA Full Merit Scholar</li>
+                            <li data-title="UM Honor Society Scholar" data-issuer="University of Mindanao" data-year="Honorary" data-icon="fa-user-graduate"><span>Award</span> UM Honor Society Scholar</li>
+                            <li data-title="Former EBSU - STEP Scholar" data-issuer="EBSU" data-year="Scholarship" data-icon="fa-award"><span>Award</span> Former EBSU - STEP Scholar</li>
+                            <li data-title="Best Capstone Project Presenter" data-issuer="University of Mindanao" data-year="2023" data-icon="fa-award"><span>2023</span> Best Capstone Project Presenter</li>
+                            <li data-title="Best Robotic Prototype" data-issuer="University of Mindanao" data-year="2023" data-icon="fa-robot"><span>2023</span> Best Robotic Prototype</li>
+                        </ul>
+                    </div>
+                    <div class="honors-col reveal-up">
+                        <h3 class="editorial-subtitle">Selected Certifications</h3>
+                        <ul class="clean-list">
+                            <li data-title="IT Specialist in Network Security" data-issuer="Certiport" data-year="2025" data-icon="fa-shield-halved"><span>Certiport</span> IT Specialist in Network Security</li>
+                            <li data-title="IT Specialist in Databases" data-issuer="Certiport" data-year="2024" data-icon="fa-database"><span>Certiport</span> IT Specialist in Databases</li>
+                            <li data-title="IT Specialist in Java" data-issuer="Certiport" data-year="2024" data-icon="fa-code"><span>Certiport</span> IT Specialist in Java</li>
+                            <li data-title="Machine Learning with Python" data-issuer="Alison" data-year="2024" data-icon="fa-brain"><span>Alison</span> Machine Learning with Python</li>
+                            <li data-title="Website Development" data-issuer="Alison" data-year="2023" data-icon="fa-laptop-code"><span>Alison</span> Website Development</li>
+                            <li data-title="Programming using C#" data-issuer="Alison" data-year="2023" data-icon="fa-hashtag"><span>Alison</span> Programming using C#</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -348,110 +217,50 @@
                     <div class="line"></div>
                 </div>
 
-                <div class="carousel-container reveal-up">
-                    <div class="projects-carousel">
-                        <div class="carousel-track">
-                            <!-- Project 1: PhishVote -->
-                            <div class="carousel-card hover-target" data-project-id="phishvote">
-                                <div class="card-glow"></div>
-                                <div class="project-content">
-                                    <div class="project-meta">
-                                        <span class="project-role">Lead Researcher</span>
-                                        <span class="project-year">2026</span>
-                                    </div>
-                                    <h3 class="project-name">PhishVote</h3>
-                                    <p class="project-desc">An Adaptive Soft-Voting Ensemble of Tree-Based Classifiers
-                                        for Phishing Website Detection.</p>
-                                    <div class="project-footer">
-                                        <span class="action-hint">Explore Project <i
-                                                class="fa-solid fa-arrow-right"></i></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Project 2: FurryTails -->
-                            <div class="carousel-card hover-target" data-project-id="furrytails">
-                                <div class="card-glow"></div>
-                                <div class="project-content">
-                                    <div class="project-meta">
-                                        <span class="project-role">Full-Stack Developer</span>
-                                        <span class="project-year">2025</span>
-                                    </div>
-                                    <h3 class="project-name">FurryTails</h3>
-                                    <p class="project-desc">An Online Pet Grooming and Boarding Reservation System
-                                        designed for seamless user experience.</p>
-                                    <div class="project-footer">
-                                        <span class="action-hint">Explore Project <i
-                                                class="fa-solid fa-arrow-right"></i></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Project 3: INSIGHTFUL -->
-                            <div class="carousel-card hover-target" data-project-id="insightful">
-                                <div class="card-glow"></div>
-                                <div class="project-content">
-                                    <div class="project-meta">
-                                        <span class="project-role">Web Developer</span>
-                                        <span class="project-year">2024</span>
-                                    </div>
-                                    <h3 class="project-name">INSIGHTFUL</h3>
-                                    <p class="project-desc">A Web-Based Accessibility App for the Visually Impaired
-                                        — Real-Time Object Detection, Text Reading, and Color Identification.</p>
-                                    <div class="project-footer">
-                                        <span class="action-hint">Explore Project <i
-                                                class="fa-solid fa-arrow-right"></i></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Project 4: Pharmacy Triage -->
-                            <div class="carousel-card hover-target" data-project-id="pharmacytriage">
-                                <div class="card-glow"></div>
-                                <div class="project-content">
-                                    <div class="project-meta">
-                                        <span class="project-role">Lead Data Analyst</span>
-                                        <span class="project-year">2026</span>
-                                    </div>
-                                    <h3 class="project-name">Pharmacy Triage</h3>
-                                    <p class="project-desc">Discrete-Event Simulation & SPT Optimization for
-                                        Hospital Pharmacy Outpatient Bottleneck Analysis using Rockwell Arena.</p>
-                                    <div class="project-footer">
-                                        <span class="action-hint">Explore Project <i
-                                                class="fa-solid fa-arrow-right"></i></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Project 5: SPASWAB -->
-                            <div class="carousel-card hover-target" data-project-id="spaswab">
-                                <div class="card-glow"></div>
-                                <div class="project-content">
-                                    <div class="project-meta">
-                                        <span class="project-role">Researcher & Programmer</span>
-                                        <span class="project-year">2023</span>
-                                    </div>
-                                    <h3 class="project-name">SPASWAB</h3>
-                                    <p class="project-desc">Solar-Powered Arduino-Based Smart Waste Bin with
-                                        automated waste segregation using proximity sensors and ultrasonic modules.</p>
-                                    <div class="project-footer">
-                                        <span class="action-hint">Explore Project <i
-                                                class="fa-solid fa-arrow-right"></i></span>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="project-list reveal-up">
+                    <!-- Project 1: PhishVote -->
+                    <div class="project-list-item hover-target" data-project-id="phishvote" data-image="assets/img/PhishVote images/PV1.jpg">
+                        <div class="project-list-info">
+                            <span class="project-list-year">2026</span>
+                            <span class="project-list-role">Lead Researcher</span>
                         </div>
+                        <h3 class="project-list-name">PhishVote</h3>
                     </div>
 
-                    <!-- Carousel Controls -->
-                    <div class="carousel-controls">
-                        <button class="carousel-btn prev-btn hover-target" aria-label="Previous Project">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-                        <div class="carousel-dots"></div>
-                        <button class="carousel-btn next-btn hover-target" aria-label="Next Project">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
+                    <!-- Project 2: FurryTails -->
+                    <div class="project-list-item hover-target" data-project-id="furrytails" data-image="assets/img/FurryTails images/landing page.jpg">
+                        <div class="project-list-info">
+                            <span class="project-list-year">2025</span>
+                            <span class="project-list-role">Full-Stack Developer</span>
+                        </div>
+                        <h3 class="project-list-name">FurryTails</h3>
+                    </div>
+
+                    <!-- Project 3: INSIGHTFUL -->
+                    <div class="project-list-item hover-target" data-project-id="insightful" data-image="assets/img/Insightful images/splash screen.png">
+                        <div class="project-list-info">
+                            <span class="project-list-year">2024</span>
+                            <span class="project-list-role">Web Developer</span>
+                        </div>
+                        <h3 class="project-list-name">Insightful</h3>
+                    </div>
+
+                    <!-- Project 4: Pharmacy Triage -->
+                    <div class="project-list-item hover-target" data-project-id="pharmacytriage" data-image="assets/img/Pharmacy Triage images/Model Design Layout.png">
+                        <div class="project-list-info">
+                            <span class="project-list-year">2026</span>
+                            <span class="project-list-role">Lead Data Analyst</span>
+                        </div>
+                        <h3 class="project-list-name">Pharmacy Triage</h3>
+                    </div>
+
+                    <!-- Project 5: SPASWAB -->
+                    <div class="project-list-item hover-target" data-project-id="spaswab" data-image="assets/img/SPASWAB images/spaswab prototype.jpg">
+                        <div class="project-list-info">
+                            <span class="project-list-year">2023</span>
+                            <span class="project-list-role">Researcher & Programmer</span>
+                        </div>
+                        <h3 class="project-list-name">Spaswab</h3>
                     </div>
                 </div>
             </div>
@@ -500,7 +309,7 @@
     <!-- Project Details Fullscreen Overlay -->
     <div id="project-portal" class="project-portal">
         <div class="portal-overlay"></div>
-        <div class="portal-container">
+        <div class="portal-container glass-panel">
             <button class="portal-close-btn hover-target" id="portal-close-btn" aria-label="Close Portal">
                 <i class="fa-solid fa-xmark"></i>
             </button>

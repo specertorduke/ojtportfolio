@@ -4,47 +4,322 @@ document.addEventListener("DOMContentLoaded", () => {
     // Register ScrollTrigger
     gsap.registerPlugin(ScrollTrigger);
 
-    // 1. Custom Cursor setup
-    const cursor = document.querySelector('.cursor');
-    const cursorFollower = document.querySelector('.cursor-follower');
-    const hoverTargets = document.querySelectorAll('.hover-target, a, button');
+    // 1. Apple iPadOS/VisionOS Snapping Cursor & Spotlight Tracking
+    const cursorDot = document.querySelector('.cursor-dot');
+    const cursorOutline = document.querySelector('.cursor-outline');
+    const cursorReveal = document.querySelector('.cursor-image-reveal');
+    const revealImg = document.getElementById('reveal-img');
+    const hoverTargets = document.querySelectorAll('.hover-target, a, button, .project-list-item');
+    const projectItems = document.querySelectorAll('.project-list-item');
 
-    // Only apply custom cursor on non-touch devices
+    // Setup for mouse coordinates tracking on spotlight elements
+    const spotlightElements = document.querySelectorAll('.navbar, .btn, .social-link');
+    spotlightElements.forEach(el => {
+        el.addEventListener('mousemove', (e) => {
+            const rect = el.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            el.style.setProperty('--mouse-x', `${x}px`);
+            el.style.setProperty('--mouse-y', `${y}px`);
+        });
+    });
+
     if (window.matchMedia("(pointer: fine)").matches) {
         let mouseX = 0, mouseY = 0;
         let followerX = 0, followerY = 0;
+        let currentSnapEl = null;
+
+        // Ensure GSAP tracks relative transforms from center
+        gsap.set(cursorDot, { xPercent: -50, yPercent: -50 });
+        gsap.set(cursorOutline, { xPercent: -50, yPercent: -50 });
 
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
 
-            // Move inner cursor instantly (0 latency)
-            gsap.set(cursor, {
-                x: mouseX,
-                y: mouseY
-            });
+            // If not currently snapped, standard position tracking
+            if (!currentSnapEl) {
+                gsap.set(cursorDot, { x: mouseX, y: mouseY });
+            }
+            gsap.set(cursorReveal, { x: mouseX, y: mouseY, xPercent: -50, yPercent: -50 });
         });
 
-        // Snappy follow for outer ring
+        // Honors & Certifications Card Hover Reveal State
+        const certItems = document.querySelectorAll('.clean-list li');
+        const certPreview = document.getElementById('cert-preview');
+        const cardTitle = document.getElementById('cert-card-title');
+        const cardIssuer = document.getElementById('cert-card-issuer');
+        const cardYear = document.getElementById('cert-card-year');
+        const cardIcon = document.getElementById('cert-card-icon');
+        
+        let isHoveringCert = false;
+        let certCardX = 0;
+        let certCardY = 0;
+
+        if (certPreview) {
+            gsap.set(certPreview, { xPercent: -50, yPercent: -50, transformOrigin: "center center" });
+        }
+
+        // Outer ring snappy follow (only active when not snapped)
         gsap.ticker.add(() => {
-            followerX += (mouseX - followerX) * 0.35;
-            followerY += (mouseY - followerY) * 0.35;
+            if (!currentSnapEl) {
+                followerX += (mouseX - followerX) * 0.35;
+                followerY += (mouseY - followerY) * 0.35;
+                gsap.set(cursorOutline, { x: followerX, y: followerY });
+            }
 
-            gsap.set(cursorFollower, {
-                x: followerX,
-                y: followerY
+            // Cert card tracking with inertia and 3D tilt
+            if (isHoveringCert && certPreview) {
+                // Slower follow rate (0.12) gives a premium, heavy floating feel
+                certCardX += (mouseX - certCardX) * 0.12;
+                certCardY += (mouseY - certCardY) * 0.12;
+                
+                const diffX = mouseX - certCardX;
+                const diffY = mouseY - certCardY;
+                
+                // Physics-based tilt relative to lag distance
+                const tiltX = -diffY * 0.15;
+                const tiltY = diffX * 0.15;
+                
+                const maxTilt = 15;
+                const clampedTiltX = Math.max(-maxTilt, Math.min(maxTilt, tiltX));
+                const clampedTiltY = Math.max(-maxTilt, Math.min(maxTilt, tiltY));
+                
+                gsap.set(certPreview, {
+                    x: certCardX,
+                    y: certCardY,
+                    transformPerspective: 1000,
+                    rotationX: clampedTiltX,
+                    rotationY: clampedTiltY
+                });
+            }
+        });
+
+        // VisionOS snapping/morphing interaction for buttons, links, etc.
+        const snapElements = document.querySelectorAll('.btn, .nav-link, .social-link, #portal-close-btn, .slideshow-nav-btn, .carousel-btn');
+
+        snapElements.forEach(elem => {
+            elem.addEventListener('mouseenter', () => {
+                currentSnapEl = elem;
+                
+                // Get element coordinates and shape
+                const rect = elem.getBoundingClientRect();
+                const centerValX = rect.left + rect.width / 2;
+                const centerValY = rect.top + rect.height / 2;
+                const borderRad = window.getComputedStyle(elem).borderRadius;
+
+                // Make cursor snap exactly to center behind the element, and match its size/shape
+                gsap.to(cursorDot, {
+                    x: centerValX,
+                    y: centerValY,
+                    width: rect.width,
+                    height: rect.height,
+                    borderRadius: borderRad,
+                    backgroundColor: 'rgba(255, 255, 255, 0.55)',
+                    border: '1px solid rgba(255, 255, 255, 0.65)',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.04)',
+                    backdropFilter: 'blur(12px)',
+                    zIndex: 99800, // Put behind element but above other elements
+                    duration: 0.35,
+                    ease: "power3.out"
+                });
+
+                // Set parent target high z-index and hide outer outline ring
+                elem.style.zIndex = '99901';
+                cursorOutline.classList.add('snapped');
+                gsap.to(cursorOutline, { opacity: 0, duration: 0.2 });
+            });
+
+            elem.addEventListener('mousemove', (e) => {
+                if (currentSnapEl === elem) {
+                    const rect = elem.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+
+                    // Magnetic pull values (pull elements slightly toward mouse)
+                    const pullX = (e.clientX - centerX) * 0.25;
+                    const pullY = (e.clientY - centerY) * 0.25;
+
+                    // Pull button container
+                    gsap.to(elem, {
+                        x: pullX,
+                        y: pullY,
+                        duration: 0.2,
+                        ease: "power2.out"
+                    });
+
+                    // Snap cursor tracks behind the button center but moves with a dampening factor
+                    gsap.to(cursorDot, {
+                        x: centerX + pullX * 0.5,
+                        y: centerY + pullY * 0.5,
+                        duration: 0.2,
+                        ease: "power2.out"
+                    });
+
+                    // Pull button inner text/icon (slight parallax shift)
+                    const innerText = elem.querySelector('.btn-text, i, span');
+                    if (innerText) {
+                        gsap.to(innerText, {
+                            x: pullX * 0.4,
+                            y: pullY * 0.4,
+                            duration: 0.2,
+                            ease: "power2.out"
+                        });
+                    }
+                }
+            });
+
+            elem.addEventListener('mouseleave', () => {
+                currentSnapEl = null;
+
+                // Reset cursor dot back to floating circle dot
+                gsap.to(cursorDot, {
+                    width: 16,
+                    height: 16,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(12, 12, 12, 0.12)',
+                    border: 'none',
+                    boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(4px)',
+                    zIndex: 99999,
+                    duration: 0.35,
+                    ease: "power3.out"
+                });
+
+                // Reset elements back to flat/center
+                gsap.to(elem, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.5,
+                    ease: "elastic.out(1, 0.35)",
+                    clearProps: "zIndex"
+                });
+
+                const innerText = elem.querySelector('.btn-text, i, span');
+                if (innerText) {
+                    gsap.to(innerText, {
+                        x: 0,
+                        y: 0,
+                        duration: 0.5,
+                        ease: "elastic.out(1, 0.35)"
+                    });
+                }
+
+                // Fade outer outline ring back in
+                cursorOutline.classList.remove('snapped');
+                gsap.to(cursorOutline, { opacity: 1, duration: 0.3 });
             });
         });
 
-        // Hover states
-        hoverTargets.forEach(target => {
-            target.addEventListener('mouseenter', () => {
-                cursor.classList.add('hovered');
-                cursorFollower.classList.add('hovered');
+        // Honors & Certifications list interaction
+        if (certPreview) {
+            certItems.forEach(item => {
+                item.addEventListener('mouseenter', (e) => {
+                    isHoveringCert = true;
+                    
+                    // Prevent large jumps when card is first revealed
+                    if (certCardX === 0 && certCardY === 0) {
+                        certCardX = e.clientX;
+                        certCardY = e.clientY;
+                    }
+                    
+                    // Update content
+                    if (cardTitle) cardTitle.textContent = item.getAttribute('data-title') || '';
+                    if (cardIssuer) cardIssuer.textContent = item.getAttribute('data-issuer') || '';
+                    if (cardYear) cardYear.textContent = item.getAttribute('data-year') || '';
+                    if (cardIcon) {
+                        const iconClass = item.getAttribute('data-icon') || 'fa-award';
+                        cardIcon.className = `fa-solid ${iconClass} cert-card-icon`;
+                    }
+                    
+                    // Animate card entrance
+                    gsap.to(certPreview, {
+                        opacity: 1,
+                        scale: 1,
+                        duration: 0.4,
+                        ease: "power3.out",
+                        overwrite: "auto"
+                    });
+                    
+                    // Contract outline cursor to act as concentrated magnifying glass / loupe
+                    cursorOutline.classList.add('inspecting');
+                    gsap.to(cursorOutline, {
+                        width: 44,
+                        height: 44,
+                        borderColor: 'rgba(0, 119, 182, 0.6)',
+                        backgroundColor: 'rgba(0, 119, 182, 0.05)',
+                        duration: 0.3,
+                        overwrite: "auto"
+                    });
+                    gsap.to(cursorDot, {
+                        scale: 0.5,
+                        backgroundColor: 'var(--accent-color)',
+                        duration: 0.3,
+                        overwrite: "auto"
+                    });
+                });
+                
+                item.addEventListener('mouseleave', () => {
+                    isHoveringCert = false;
+                    
+                    // Animate card exit
+                    gsap.to(certPreview, {
+                        opacity: 0,
+                        scale: 0.8,
+                        duration: 0.3,
+                        ease: "power3.inOut",
+                        overwrite: "auto"
+                    });
+                    
+                    // Restore cursor state
+                    cursorOutline.classList.remove('inspecting');
+                    gsap.to(cursorOutline, {
+                        width: 32,
+                        height: 32,
+                        borderColor: 'rgba(0, 119, 182, 0.25)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        duration: 0.3,
+                        overwrite: "auto"
+                    });
+                    gsap.to(cursorDot, {
+                        scale: 1,
+                        backgroundColor: 'rgba(12, 12, 12, 0.12)',
+                        duration: 0.3,
+                        overwrite: "auto"
+                    });
+                });
             });
-            target.addEventListener('mouseleave', () => {
-                cursor.classList.remove('hovered');
-                cursorFollower.classList.remove('hovered');
+        }
+
+        // Project Image Reveal hover listeners
+        projectItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const imgSrc = item.getAttribute('data-image');
+                if (imgSrc) {
+                    revealImg.src = imgSrc;
+                    gsap.to(cursorReveal, {
+                        opacity: 1,
+                        scale: 1,
+                        rotation: 0,
+                        duration: 0.4,
+                        ease: "power3.out",
+                        overwrite: "auto"
+                    });
+                    gsap.to(cursorDot, { opacity: 0, duration: 0.2 });
+                    gsap.to(cursorOutline, { opacity: 0, duration: 0.2 });
+                }
+            });
+            item.addEventListener('mouseleave', () => {
+                gsap.to(cursorReveal, {
+                    opacity: 0,
+                    scale: 0.8,
+                    rotation: -5,
+                    duration: 0.4,
+                    ease: "power3.out",
+                    overwrite: "auto"
+                });
+                gsap.to(cursorDot, { opacity: 1, duration: 0.2 });
+                gsap.to(cursorOutline, { opacity: 1, duration: 0.2 });
             });
         });
     }
@@ -170,416 +445,41 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.set(".hero-cta", { y: 80, opacity: 0 });
     gsap.set(".scroll-indicator", { opacity: 0 });
 
-    // 3. Intro Sequence Animations
-    const introTl = gsap.timeline();
-
-    // First, show the particle
-    gsap.fromTo(".intro-particle",
-        { scale: 0.3, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 1.2, ease: "power2.out" }
-    );
-
-    // Continuous pulse on particle
-    const pulseTween = gsap.to(".intro-particle", {
-        scale: 1.4,
-        opacity: 0.8,
-        duration: 0.8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
+    // 3. Cinematic Minimal Loader
+    const counterObj = { val: 0 };
+    const counterEl = document.querySelector(".intro-counter");
+    const progressEl = document.querySelector(".intro-progress-bar");
+    const introTl = gsap.timeline({
+        onComplete: () => {
+            document.body.classList.remove("loading");
+            const overlay = document.querySelector(".intro-overlay");
+            if (overlay) overlay.remove();
+            runMainReveal();
+        }
     });
 
-    // Morph particle to rotating cyber core
-    introTl.to(".intro-particle", {
-        scale: 4,
+    introTl.to(counterObj, {
+        val: 100,
+        duration: 2.2,
+        ease: "expo.inOut",
+        onUpdate: () => {
+            if (counterEl) counterEl.textContent = Math.floor(counterObj.val) + "%";
+            if (progressEl) progressEl.style.width = counterObj.val + "%";
+        }
+    });
+
+    introTl.to(".intro-loader-content", {
+        y: -50,
         opacity: 0,
         duration: 0.8,
-        ease: "power2.inOut",
-        onComplete: () => {
-            pulseTween.kill();
-            const particle = document.querySelector(".intro-particle");
-            if (particle) particle.style.display = "none";
-        }
+        ease: "power3.in"
     }, "+=0.2");
 
-    introTl.to(".intro-core", {
-        scale: 1,
-        opacity: 1,
-        duration: 1.0,
-        ease: "elastic.out(1, 0.75)"
-    }, "-=0.8");
-
-    // Swing-down 3D reveal for "hello !" characters
-    introTl.fromTo(".intro-title .char-trigger",
-        {
-            opacity: 0,
-            y: 40,
-            rotationX: -90,
-            transformPerspective: 600,
-            transformOrigin: "50% 0%"
-        },
-        {
-            opacity: 1,
-            y: 0,
-            rotationX: 0,
-            duration: 0.8,
-            stagger: 0.06,
-            ease: "back.out(2.5)"
-        },
-        "-=0.6"
-    );
-
-    // Reveal divider line
-    introTl.to(".intro-divider", {
-        width: "140px",
-        duration: 0.8,
+    introTl.to(".intro-overlay", {
+        opacity: 0,
+        duration: 0.6,
         ease: "power2.inOut"
-    }, "-=0.5");
-
-    // Reveal subtitles with snappy elastic pop
-    introTl.fromTo(".intro-sub-item",
-        {
-            opacity: 0,
-            y: 35,
-            scale: 0.95
-        },
-        {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.8,
-            stagger: 0.15,
-            ease: "back.out(2)"
-        },
-        "-=0.4"
-    );
-
-    // Reveal Initialize button
-    introTl.to(".intro-trigger-container", {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power3.out"
-    }, "-=0.3");
-
-    // Interactive Canvas Plexus Background Setup
-    const canvas = document.querySelector(".intro-canvas");
-    if (canvas) {
-        const ctx = canvas.getContext("2d");
-        let particles = [];
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-
-        const maxParticles = Math.min(80, Math.floor((width * height) / 15000));
-        let mouse = { x: null, y: null, radius: 180 };
-
-        window.addEventListener("resize", () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        });
-
-        window.addEventListener("mousemove", (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        });
-        window.addEventListener("mouseout", () => {
-            mouse.x = null;
-            mouse.y = null;
-        });
-
-        window.introCanvasPhase = 'normal';
-        window.sliderProgress = 0;
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 1.5;
-                this.vy = (Math.random() - 0.5) * 1.5;
-                this.radius = Math.random() * 2 + 1;
-            }
-
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Bounce off edges correctly to avoid getting trapped
-                if (this.x <= 0) { this.x = 0; this.vx = Math.abs(this.vx); }
-                if (this.x >= width) { this.x = width; this.vx = -Math.abs(this.vx); }
-                if (this.y <= 0) { this.y = 0; this.vy = Math.abs(this.vy); }
-                if (this.y >= height) { this.y = height; this.vy = -Math.abs(this.vy); }
-
-                if (window.introCanvasPhase === 'normal') {
-                    // Apply friction if moving too fast (e.g. after explosion)
-                    const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                    if (speed > 1) {
-                        this.vx *= 0.94;
-                        this.vy *= 0.94;
-                    }
-
-                    // Pull towards center based on slider progress
-                    if (window.sliderProgress > 0) {
-                        const cx = width / 2;
-                        const cy = height / 2;
-                        const dx = cx - this.x;
-                        const dy = cy - this.y;
-                        this.vx += dx * 0.003 * window.sliderProgress;
-                        this.vy += dy * 0.003 * window.sliderProgress;
-                    }
-
-                    // Mouse repel
-                    if (mouse.x !== null && mouse.y !== null) {
-                        const dx = this.x - mouse.x;
-                        const dy = this.y - mouse.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < mouse.radius) {
-                            const force = (mouse.radius - dist) / mouse.radius;
-                            this.vx -= (dx / dist) * force * 1.5;
-                            this.vy -= (dy / dist) * force * 1.5;
-                        }
-                    }
-                } else if (window.introCanvasPhase === 'implode') {
-                    const cx = width / 2;
-                    const cy = height / 2;
-                    const dx = cx - this.x;
-                    const dy = cy - this.y;
-                    this.vx += dx * 0.035;
-                    this.vy += dy * 0.035;
-                    // Apply strong friction so they gather cleanly at center and do not slingshot past it
-                    this.vx *= 0.82;
-                    this.vy *= 0.82;
-                } else if (window.introCanvasPhase === 'explode') {
-                    const cx = width / 2;
-                    const cy = height / 2;
-                    const dx = this.x - cx;
-                    const dy = this.y - cy;
-                    // Authoritatively overwrite velocity for a consistent, smooth outward burst
-                    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
-                        const angle = Math.random() * Math.PI * 2;
-                        this.vx = Math.cos(angle) * 7;
-                        this.vy = Math.sin(angle) * 7;
-                    } else {
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        this.vx = (dx / dist) * 10;
-                        this.vy = (dy / dist) * 10;
-                    }
-                }
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = "rgba(0, 240, 255, 0.4)";
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < maxParticles; i++) {
-            particles.push(new Particle());
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-
-            ctx.fillStyle = "rgba(0, 240, 255, 0.015)";
-            const gridSize = 40;
-            for (let x = 0; x < width; x += gridSize) {
-                for (let y = 0; y < height; y += gridSize) {
-                    ctx.fillRect(x, y, 1, 1);
-                }
-            }
-
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-
-            // Reset explosion phase immediately after exactly one frame has processed it
-            if (window.introCanvasPhase === 'explode') {
-                window.introCanvasPhase = 'normal';
-            }
-
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const p1 = particles[i];
-                    const p2 = particles[j];
-                    const dx = p1.x - p2.x;
-                    const dy = p1.y - p2.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-
-                    if (dist < 100) {
-                        const alpha = ((100 - dist) / 100) * 0.15;
-                        ctx.beginPath();
-                        ctx.moveTo(p1.x, p1.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(0, 240, 255, ${alpha})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
-                    }
-                }
-
-                if (mouse.x !== null && mouse.y !== null) {
-                    const p = particles[i];
-                    const dx = p.x - mouse.x;
-                    const dy = p.y - mouse.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-
-                    if (dist < mouse.radius) {
-                        const alpha = ((mouse.radius - dist) / mouse.radius) * 0.25;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(mouse.x, mouse.y);
-                        ctx.strokeStyle = `rgba(0, 240, 255, ${alpha})`;
-                        ctx.lineWidth = 0.7;
-                        ctx.stroke();
-                    }
-                }
-            }
-
-            if (document.body.contains(canvas)) {
-                requestAnimationFrame(animate);
-            }
-        }
-        animate();
-    }
-
-    // Slide to Access Decryption Lock
-    const sliderContainer = document.querySelector(".intro-slider-container");
-    const sliderHandle = document.querySelector(".intro-slider-handle");
-    const sliderFill = document.querySelector(".intro-slider-fill");
-    const sliderText = document.querySelector(".intro-slider-text");
-
-    if (sliderContainer && sliderHandle) {
-        let isDragging = false;
-        let startX = 0;
-        let containerWidth = sliderContainer.clientWidth;
-        let handleWidth = sliderHandle.clientWidth;
-        let maxX = containerWidth - handleWidth - 6;
-
-        const onDragStart = (e) => {
-            isDragging = true;
-            startX = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) - (parseFloat(sliderHandle.style.left) || 3);
-            sliderHandle.style.transition = "none";
-            sliderFill.style.transition = "none";
-            document.body.style.cursor = "grabbing";
-        };
-
-        const onDragMove = (e) => {
-            if (!isDragging) return;
-            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : null);
-            if (clientX === null) return;
-
-            let x = clientX - startX;
-            if (x < 3) x = 3;
-            if (x > maxX + 3) x = maxX + 3;
-
-            sliderHandle.style.left = x + "px";
-            sliderFill.style.width = (x + handleWidth / 2) + "px";
-
-            const progress = (x - 3) / maxX;
-            window.sliderProgress = progress;
-            sliderText.style.opacity = Math.max(0, 1 - progress * 1.5);
-        };
-
-        const onDragEnd = () => {
-            if (!isDragging) return;
-            isDragging = false;
-            document.body.style.cursor = "";
-
-            const currentX = parseFloat(sliderHandle.style.left) || 3;
-            if (currentX >= maxX - 10) {
-                sliderHandle.style.left = (maxX + 3) + "px";
-                sliderFill.style.width = "100%";
-                sliderContainer.classList.add("unlocked", "scanning");
-
-                const handleIcon = sliderHandle.querySelector(".handle-icon");
-                const successIcon = sliderHandle.querySelector(".success-icon");
-                if (handleIcon) handleIcon.style.display = "none";
-                if (successIcon) successIcon.style.display = "block";
-
-                sliderText.textContent = "ACCESS GRANTED";
-                sliderText.style.opacity = "1";
-
-                // Turn off slider gravity so explosion can happen freely
-                window.sliderProgress = 0;
-
-                // Canvas Implode/Explode effect
-                window.introCanvasPhase = 'implode';
-                setTimeout(() => {
-                    window.introCanvasPhase = 'explode';
-                }, 400); // Explode outward when core vanishes
-                // (It will automatically switch back to 'normal' internally inside Particle.update)
-
-                setTimeout(() => {
-                    const exitTl = gsap.timeline({
-                        onComplete: () => {
-                            document.body.classList.remove("loading");
-                            const overlay = document.querySelector(".intro-overlay");
-                            const canvasBg = document.querySelector(".intro-canvas");
-                            if (canvasBg && overlay) {
-                                // Transition the canvas to the main site background
-                                canvasBg.classList.add("main-bg");
-                                document.body.insertBefore(canvasBg, document.body.firstChild);
-                            }
-                            if (overlay) overlay.remove();
-                            runMainReveal();
-                        }
-                    });
-
-                    exitTl.to(sliderContainer, {
-                        scale: 0.95,
-                        opacity: 0,
-                        duration: 0.3,
-                        ease: "power2.out"
-                    });
-
-                    // Cool cyber-implode fade out for the core
-                    exitTl.to(".intro-core", {
-                        scale: 0.3,
-                        rotation: 90,
-                        opacity: 0,
-                        duration: 0.7,
-                        ease: "back.in(1.5)"
-                    }, "-=0.1");
-
-                    exitTl.to(".intro-text", {
-                        y: -60,
-                        opacity: 0,
-                        duration: 0.8,
-                        ease: "power3.in"
-                    }, "-=1.2");
-
-                    exitTl.to(".intro-overlay", {
-                        opacity: 0,
-                        duration: 0.9,
-                        ease: "power2.out"
-                    }, "-=0.7");
-                }, 600);
-            } else {
-                sliderHandle.style.transition = "left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-                sliderFill.style.transition = "width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-                sliderHandle.style.left = "3px";
-                sliderFill.style.width = "0%";
-                sliderText.style.opacity = "1";
-                window.sliderProgress = 0; // Reset canvas particles
-            }
-        };
-
-        sliderHandle.addEventListener("mousedown", onDragStart);
-        sliderHandle.addEventListener("touchstart", onDragStart, { passive: true });
-
-        window.addEventListener("mousemove", onDragMove);
-        window.addEventListener("touchmove", onDragMove, { passive: false });
-
-        window.addEventListener("mouseup", onDragEnd);
-        window.addEventListener("touchend", onDragEnd);
-
-        window.addEventListener("resize", () => {
-            containerWidth = sliderContainer.clientWidth;
-            handleWidth = sliderHandle.clientWidth;
-            maxX = containerWidth - handleWidth - 6;
-        });
-    }
+    }, "-=0.4");
 
     // Page Reveal Timeline
     function runMainReveal() {
@@ -715,33 +615,83 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     });
 
-    // Certifications Staggered Reveal
-    gsap.fromTo(".cert-item",
-        { x: -50, opacity: 0 },
+    // Profile Scrub Text Reveal
+    const scrubText = document.getElementById('scrub-text');
+    if (scrubText) {
+        // Split text into words
+        const text = scrubText.innerText;
+        scrubText.innerHTML = '';
+        text.split(' ').forEach(word => {
+            if (word.trim() !== '') {
+                const span = document.createElement('span');
+                span.classList.add('scrub-word');
+                span.innerText = word + ' ';
+                scrubText.appendChild(span);
+            }
+        });
+
+        const words = scrubText.querySelectorAll('.scrub-word');
+        gsap.to(words, {
+            opacity: 1,
+            stagger: 0.1,
+            ease: "none",
+            scrollTrigger: {
+                trigger: scrubText,
+                start: "top 80%",
+                end: "bottom 50%",
+                scrub: 0.5
+            }
+        });
+    }
+
+    // 3D Interactive Glass Panels (Awwwards effect with settle-down mechanism)
+    const glassPanels = document.querySelectorAll('.glass-panel:not(.navbar)');
+    glassPanels.forEach(panel => {
+        let tiltTimeout;
+        
+        panel.addEventListener('mousemove', (e) => {
+            panel.style.transition = `transform 0.1s ease-out`;
+            const rect = panel.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // Calculate tilt (max 6 degrees for better readability)
+            const rotateX = ((y - centerY) / centerY) * -6;
+            const rotateY = ((x - centerX) / centerX) * 6;
+            
+            panel.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+            
+            clearTimeout(tiltTimeout);
+            tiltTimeout = setTimeout(() => {
+                panel.style.transition = `transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)`;
+                panel.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+            }, 800); // Settle back to flat after 800ms of no movement
+        });
+        
+        panel.addEventListener('mouseleave', () => {
+            clearTimeout(tiltTimeout);
+            panel.style.transition = `transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)`;
+            panel.style.transform = `perspective(1200px) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
+        });
+        
+        panel.addEventListener('mouseenter', () => {
+            panel.style.transition = `transform 0.1s ease-out`;
+        });
+    });
+
+    // List Items (Honors and Certifications) Staggered Reveal
+    gsap.fromTo(".clean-list li",
+        { y: 30, opacity: 0 },
         {
-            x: 0,
+            y: 0,
             opacity: 1,
             duration: 0.6,
-            stagger: 0.1,
+            stagger: 0.05,
             ease: "power2.out",
             scrollTrigger: {
-                trigger: ".cert-list",
-                start: "top 80%"
-            }
-        }
-    );
-
-    // Tags Staggered Reveal
-    gsap.fromTo(".tag",
-        { scale: 0.8, opacity: 0 },
-        {
-            scale: 1,
-            opacity: 1,
-            duration: 0.4,
-            stagger: 0.05,
-            ease: "back.out(1.7)",
-            scrollTrigger: {
-                trigger: ".tags",
+                trigger: ".honors-grid",
                 start: "top 85%"
             }
         }
@@ -785,11 +735,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     <path d="M 590 350 L 500 350" stroke="var(--accent-color)" stroke-width="2" />
                     <text x="30" y="45" font-family="Courier, monospace" font-size="13" fill="var(--accent-color)" font-weight="bold" letter-spacing="1">VET_CLINIC_APPOINTMENTS // TIME_SLOTS</text>
                     <g transform="translate(30, 80)">
-                        <rect x="0" y="0" width="220" height="200" rx="4" stroke="rgba(0, 240, 255, 0.4)" stroke-width="1" fill="none" />
-                        <text x="10" y="25" font-family="Courier, monospace" font-size="11" fill="#fff">APPOINTMENT SCHEDULER</text>
-                        <line x1="10" y1="35" x2="210" y2="35" stroke="rgba(0, 240, 255, 0.2)" stroke-width="1" />
+                        <rect x="0" y="0" width="220" height="200" rx="4" stroke="rgba(0, 119, 182, 0.4)" stroke-width="1" fill="none" />
+                        <text x="10" y="25" font-family="Courier, monospace" font-size="11" fill="#0f172a">APPOINTMENT SCHEDULER</text>
+                        <line x1="10" y1="35" x2="210" y2="35" stroke="rgba(0, 119, 182, 0.2)" stroke-width="1" />
                         
-                        <g transform="translate(15, 50)" font-family="Courier, monospace" font-size="9" fill="#ccc">
+                        <g transform="translate(15, 50)" font-family="Courier, monospace" font-size="9" fill="#334155">
                             <text x="0" y="10">09:00 AM [BOOKED]</text>
                             <rect x="145" y="0" width="45" height="12" rx="2" fill="rgba(255, 0, 0, 0.15)" stroke="red" stroke-width="0.5" />
                             <text x="148" y="9" font-size="7" fill="red">UNAVAIL</text>
@@ -799,40 +749,40 @@ document.addEventListener("DOMContentLoaded", () => {
                             <text x="148" y="29" font-size="7" fill="orange">PENDING</text>
 
                             <text x="0" y="50">11:00 AM [AVAILABLE]</text>
-                            <rect x="145" y="40" width="45" height="12" rx="2" fill="rgba(0, 240, 255, 0.15)" stroke="var(--accent-color)" stroke-width="0.5" class="bp-pulse" />
+                            <rect x="145" y="40" width="45" height="12" rx="2" fill="rgba(0, 119, 182, 0.15)" stroke="var(--accent-color)" stroke-width="0.5" class="bp-pulse" />
                             <text x="148" y="49" font-size="7" fill="var(--accent-color)">SELECT</text>
 
                             <text x="0" y="70">12:00 PM [AVAILABLE]</text>
-                            <rect x="145" y="60" width="45" height="12" rx="2" fill="rgba(0, 240, 255, 0.05)" stroke="rgba(0, 240, 255, 0.3)" stroke-width="0.5" />
-                            <text x="148" y="69" font-size="7" fill="#888">SELECT</text>
+                            <rect x="145" y="60" width="45" height="12" rx="2" fill="rgba(0, 119, 182, 0.05)" stroke="rgba(0, 119, 182, 0.3)" stroke-width="0.5" />
+                            <text x="148" y="69" font-size="7" fill="#64748b">SELECT</text>
                             
                             <text x="0" y="90">01:00 PM [AVAILABLE]</text>
-                            <rect x="145" y="80" width="45" height="12" rx="2" fill="rgba(0, 240, 255, 0.05)" stroke="rgba(0, 240, 255, 0.3)" stroke-width="0.5" />
-                            <text x="148" y="89" font-size="7" fill="#888">SELECT</text>
+                            <rect x="145" y="80" width="45" height="12" rx="2" fill="rgba(0, 119, 182, 0.05)" stroke="rgba(0, 119, 182, 0.3)" stroke-width="0.5" />
+                            <text x="148" y="89" font-size="7" fill="#64748b">SELECT</text>
                         </g>
                         <text x="15" y="180" font-family="Courier, monospace" font-size="9" fill="var(--accent-color)" opacity="0.8">SLOT_INTERVAL: 60 MIN</text>
                     </g>
                     <g transform="translate(280, 80)">
-                        <rect x="0" y="0" width="290" height="200" rx="4" stroke="rgba(0, 240, 255, 0.4)" stroke-width="1" fill="none" />
-                        <text x="15" y="25" font-family="Courier, monospace" font-size="11" fill="#fff">APPOINTMENT SUMMARY</text>
-                        <line x1="15" y1="35" x2="275" y2="35" stroke="rgba(0, 240, 255, 0.2)" stroke-width="1" />
-                        <rect x="15" y="50" width="260" height="25" rx="3" stroke="rgba(0, 240, 255, 0.2)" fill="rgba(0,240,255,0.03)" />
-                        <text x="25" y="66" font-family="Courier, monospace" font-size="9" fill="#bbb">PET: Rocky (G. Shepherd)</text>
+                        <rect x="0" y="0" width="290" height="200" rx="4" stroke="rgba(0, 119, 182, 0.4)" stroke-width="1" fill="none" />
+                        <text x="15" y="25" font-family="Courier, monospace" font-size="11" fill="#0f172a">APPOINTMENT SUMMARY</text>
+                        <line x1="15" y1="35" x2="275" y2="35" stroke="rgba(0, 119, 182, 0.2)" stroke-width="1" />
+                        <rect x="15" y="50" width="260" height="25" rx="3" stroke="rgba(0, 119, 182, 0.2)" fill="rgba(0, 119, 182, 0.03)" />
+                        <text x="25" y="66" font-family="Courier, monospace" font-size="9" fill="#475569">PET: Rocky (G. Shepherd)</text>
                         
-                        <rect x="15" y="85" width="260" height="25" rx="3" stroke="rgba(0, 240, 255, 0.2)" fill="rgba(0,240,255,0.03)" />
-                        <text x="25" y="101" font-family="Courier, monospace" font-size="9" fill="#bbb">SERVICE: Anti-Rabies Vaccine</text>
+                        <rect x="15" y="85" width="260" height="25" rx="3" stroke="rgba(0, 119, 182, 0.2)" fill="rgba(0, 119, 182, 0.03)" />
+                        <text x="25" y="101" font-family="Courier, monospace" font-size="9" fill="#475569">SERVICE: Anti-Rabies Vaccine</text>
                         
                         <g transform="translate(15, 122)">
-                            <text x="0" y="12" font-family="Courier, monospace" font-size="9" fill="#888">SERVICE BASE FEE ............. $35.00</text>
-                            <text x="0" y="27" font-family="Courier, monospace" font-size="9" fill="#888">SCHEDULING TARIFF ............ $0.00</text>
+                            <text x="0" y="12" font-family="Courier, monospace" font-size="9" fill="#64748b">SERVICE BASE FEE ............. $35.00</text>
+                            <text x="0" y="27" font-family="Courier, monospace" font-size="9" fill="#64748b">SCHEDULING TARIFF ............ $0.00</text>
                             <line x1="0" y1="35" x2="260" y2="35" stroke="rgba(0,240,255,0.15)" stroke-width="1" stroke-dasharray="3 3" />
                             <text x="0" y="52" font-family="Courier, monospace" font-size="11" fill="var(--accent-color)" font-weight="bold">TOTAL DUE: $35.00</text>
                         </g>
                     </g>
-                    <path d="M 30 310 L 570 310" stroke="rgba(0, 240, 255, 0.2)" stroke-width="1" />
+                    <path d="M 30 310 L 570 310" stroke="rgba(0, 119, 182, 0.2)" stroke-width="1" />
                     <circle cx="45" cy="330" r="4" fill="var(--accent-color)" class="bp-pulse" />
                     <text x="60" y="334" font-family="Courier, monospace" font-size="9" fill="var(--accent-color)" opacity="0.8">TIMESLOT_VALIDATOR: STABLE</text>
-                    <rect x="460" y="320" width="110" height="22" rx="3" stroke="var(--accent-color)" fill="rgba(0,240,255,0.05)" />
+                    <rect x="460" y="320" width="110" height="22" rx="3" stroke="var(--accent-color)" fill="rgba(0, 119, 182, 0.05)" />
                     <text x="475" y="335" font-family="Courier, monospace" font-size="9" fill="var(--accent-color)" font-weight="bold" letter-spacing="1">SUBMIT_APPT</text>
                 </svg>
                 `;
@@ -842,19 +792,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     <rect x="10" y="10" width="580" height="360" rx="6" stroke="var(--accent-color)" stroke-width="1" stroke-dasharray="10 5" fill="none" opacity="0.3" />
                     <text x="30" y="45" font-family="Courier, monospace" font-size="13" fill="var(--accent-color)" font-weight="bold" letter-spacing="1">PET_BOARDING_LODGING // CAPACITY_CHECK</text>
                     <g transform="translate(30, 75)">
-                        <rect x="0" y="0" width="540" height="210" rx="4" stroke="rgba(0, 240, 255, 0.4)" stroke-width="1" fill="none" />
+                        <rect x="0" y="0" width="540" height="210" rx="4" stroke="rgba(0, 119, 182, 0.4)" stroke-width="1" fill="none" />
                         <text x="15" y="25" font-family="Courier, monospace" font-size="11" fill="var(--accent-secondary)" font-weight="bold">LODGING SCHEDULER & CAPACITY</text>
-                        <line x1="15" y1="35" x2="525" y2="35" stroke="rgba(0, 240, 255, 0.2)" stroke-width="1" />
+                        <line x1="15" y1="35" x2="525" y2="35" stroke="rgba(0, 119, 182, 0.2)" stroke-width="1" />
                         
-                        <g transform="translate(20, 50)" font-family="Courier, monospace" font-size="10" fill="#ccc">
+                        <g transform="translate(20, 50)" font-family="Courier, monospace" font-size="10" fill="#334155">
                             <text x="0" y="15">BOARDING TYPE: [OVERNIGHT]</text>
-                            <rect x="240" y="2" width="260" height="20" rx="3" stroke="rgba(0, 240, 255, 0.2)" fill="rgba(0,240,255,0.03)" />
-                            <text x="250" y="15" fill="#888">Daycare | *Overnight* | Extended</text>
+                            <rect x="240" y="2" width="260" height="20" rx="3" stroke="rgba(0, 119, 182, 0.2)" fill="rgba(0, 119, 182, 0.03)" />
+                            <text x="250" y="15" fill="#64748b">Daycare | *Overnight* | Extended</text>
                             
                             <text x="0" y="50">START DATE: [JUNE 15, 2025]</text>
                             <text x="270" y="50">END DATE: [JUNE 18, 2025] (3 DAYS)</text>
                             
-                            <line x1="0" y1="75" x2="500" y2="75" stroke="rgba(0, 240, 255, 0.15)" stroke-width="1" />
+                            <line x1="0" y1="75" x2="500" y2="75" stroke="rgba(0, 119, 182, 0.15)" stroke-width="1" />
                             
                             <text x="0" y="105" fill="var(--accent-color)" font-weight="bold">DB_LOCK: checkBoardingCapacity()</text>
                             <text x="0" y="125">OCCUPANTS IN DATE RANGE: 14 CLIENTS</text>
@@ -875,38 +825,38 @@ document.addEventListener("DOMContentLoaded", () => {
                     <rect x="10" y="10" width="580" height="360" rx="6" stroke="var(--accent-color)" stroke-width="1" stroke-dasharray="10 5" fill="none" opacity="0.3" />
                     <text x="30" y="45" font-family="Courier, monospace" font-size="13" fill="var(--accent-color)" font-weight="bold" letter-spacing="1">PAYMENT_REGISTRY // POLYMORPHIC_VERIFICATION</text>
                     <g transform="translate(30, 75)">
-                        <rect x="0" y="0" width="240" height="215" rx="5" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
-                        <text x="20" y="25" font-family="Courier, monospace" font-size="11" fill="#fff" font-weight="bold">BILLING DETAILS</text>
+                        <rect x="0" y="0" width="240" height="215" rx="5" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
+                        <text x="20" y="25" font-family="Courier, monospace" font-size="11" fill="#0f172a" font-weight="bold">BILLING DETAILS</text>
                         <line x1="20" y1="35" x2="220" y2="35" stroke="rgba(0,240,255,0.2)" />
-                        <text x="20" y="60" font-family="Courier, monospace" font-size="9" fill="#888">PAYEE ID: .... USER_ID#0482</text>
-                        <text x="20" y="80" font-family="Courier, monospace" font-size="9" fill="#888">PAYABLE TYPE: . App\\\\Models\\\\Boarding</text>
-                        <text x="20" y="100" font-family="Courier, monospace" font-size="9" fill="#888">TOTAL BILL: ... $135.00</text>
+                        <text x="20" y="60" font-family="Courier, monospace" font-size="9" fill="#64748b">PAYEE ID: .... USER_ID#0482</text>
+                        <text x="20" y="80" font-family="Courier, monospace" font-size="9" fill="#64748b">PAYABLE TYPE: . App\\\\Models\\\\Boarding</text>
+                        <text x="20" y="100" font-family="Courier, monospace" font-size="9" fill="#64748b">TOTAL BILL: ... $135.00</text>
                         <line x1="20" y1="120" x2="220" y2="120" stroke="rgba(0,240,255,0.2)" />
-                        <text x="20" y="145" font-family="Courier, monospace" font-size="9" fill="#fff">METHOD: GCash</text>
-                        <text x="20" y="165" font-family="Courier, monospace" font-size="9" fill="#fff">TYPE: 30% Deposit ($40.50)</text>
+                        <text x="20" y="145" font-family="Courier, monospace" font-size="9" fill="#0f172a">METHOD: GCash</text>
+                        <text x="20" y="165" font-family="Courier, monospace" font-size="9" fill="#0f172a">TYPE: 30% Deposit ($40.50)</text>
                         <text x="20" y="190" font-family="Courier, monospace" font-size="9" fill="var(--accent-secondary)" font-weight="bold">REF NO: 2025091512345</text>
                     </g>
                     <g transform="translate(290, 75)">
-                        <rect x="0" y="0" width="280" height="215" rx="5" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
-                        <text x="15" y="22" font-family="Courier, monospace" font-size="11" fill="#fff" font-weight="bold">STAFF VERIFICATION QUEUE</text>
+                        <rect x="0" y="0" width="280" height="215" rx="5" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
+                        <text x="15" y="22" font-family="Courier, monospace" font-size="11" fill="#0f172a" font-weight="bold">STAFF VERIFICATION QUEUE</text>
                         <line x1="15" y1="32" x2="265" y2="32" stroke="rgba(0,240,255,0.2)" />
                         <text x="15" y="55" font-family="Courier, monospace" font-size="9" fill="var(--accent-color)">STATUS: PENDING STAFF SIGN-OFF</text>
                         
-                        <g transform="translate(15, 80)" font-family="Courier, monospace" font-size="9" fill="#ccc">
+                        <g transform="translate(15, 80)" font-family="Courier, monospace" font-size="9" fill="#334155">
                             <text x="0" y="10">GCash Ref Format ..... [13 Digits] OK</text>
                             <text x="0" y="30">User Verification ... [Google Sign-in] OK</text>
                             <text x="0" y="50">Polymorphic Link .... [BoardingID #12] OK</text>
                         </g>
                         
                         <g transform="translate(15, 160)">
-                            <text x="0" y="12" font-family="Courier, monospace" font-size="9" fill="#fff">EMAIL NOTIFIER TRIGGERS:</text>
+                            <text x="0" y="12" font-family="Courier, monospace" font-size="9" fill="#0f172a">EMAIL NOTIFIER TRIGGERS:</text>
                             <rect x="0" y="22" width="10" height="10" stroke="var(--accent-color)" fill="rgba(0,240,255,0.2)" />
                             <path d="M 2 27 L 4 29 L 8 23" stroke="var(--accent-color)" stroke-width="1.5" fill="none" />
-                            <text x="18" y="31" font-family="Courier, monospace" font-size="9" fill="#ccc">BookingConfirmation Mail</text>
+                            <text x="18" y="31" font-family="Courier, monospace" font-size="9" fill="#334155">BookingConfirmation Mail</text>
                         </g>
                     </g>
                     <g transform="translate(30, 310)">
-                        <rect x="0" y="0" width="540" height="30" rx="3" stroke="rgba(0, 240, 255, 0.3)" fill="rgba(0, 240, 255, 0.05)" stroke-width="1" />
+                        <rect x="0" y="0" width="540" height="30" rx="3" stroke="rgba(0, 119, 182, 0.3)" fill="rgba(0, 119, 182, 0.05)" stroke-width="1" />
                         <text x="20" y="19" font-family="Courier, monospace" font-size="10" fill="var(--accent-color)" font-weight="bold">TRANSACTION: PENDING STAFF VERIFICATION TO COMPLETE RESERVATION</text>
                     </g>
                 </svg>
@@ -924,8 +874,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <path d="M 385 305 L 385 290 M 385 305 L 370 305" stroke="var(--accent-color)" stroke-width="2.5" fill="none" />
                     <circle cx="210" cy="185" r="45" stroke="var(--accent-color)" stroke-width="1.2" stroke-dasharray="4 4" fill="none" class="bp-rotate" />
                     <circle cx="210" cy="185" r="15" stroke="var(--accent-color)" stroke-width="1" fill="none" />
-                    <line x1="210" y1="130" x2="210" y2="240" stroke="rgba(0, 240, 255, 0.3)" stroke-width="1" />
-                    <line x1="155" y1="185" x2="265" y2="185" stroke="rgba(0, 240, 255, 0.3)" stroke-width="1" />
+                    <line x1="210" y1="130" x2="210" y2="240" stroke="rgba(0, 119, 182, 0.3)" stroke-width="1" />
+                    <line x1="155" y1="185" x2="265" y2="185" stroke="rgba(0, 119, 182, 0.3)" stroke-width="1" />
                     <g transform="translate(60, 150)">
                         <rect x="0" y="0" width="80" height="100" rx="2" stroke="var(--accent-color)" stroke-width="1.5" fill="none" stroke-dasharray="4 2" />
                         <rect x="0" y="-18" width="65" height="18" fill="var(--accent-color)" />
@@ -937,20 +887,20 @@ document.addEventListener("DOMContentLoaded", () => {
                         <text x="5" y="-5" font-family="Courier, monospace" font-size="9" fill="#000" font-weight="bold">KEYBOARD 91%</text>
                     </g>
                     <g transform="translate(415, 45)">
-                        <rect x="0" y="0" width="160" height="280" rx="4" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
+                        <rect x="0" y="0" width="160" height="280" rx="4" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
                         <text x="12" y="25" font-family="Courier, monospace" font-size="11" fill="var(--accent-color)" font-weight="bold">VISION SYSTEM</text>
                         <line x1="12" y1="35" x2="148" y2="35" stroke="rgba(0,240,255,0.2)" />
-                        <text x="12" y="55" font-family="Courier, monospace" font-size="9" fill="#888" class="bp-pulse">STATUS: CAPTURING</text>
-                        <text x="12" y="75" font-family="Courier, monospace" font-size="9" fill="#888">FPS: 30.0</text>
-                        <text x="12" y="95" font-family="Courier, monospace" font-size="9" fill="#888">LATENCY: 12MS</text>
+                        <text x="12" y="55" font-family="Courier, monospace" font-size="9" fill="#64748b" class="bp-pulse">STATUS: CAPTURING</text>
+                        <text x="12" y="75" font-family="Courier, monospace" font-size="9" fill="#64748b">FPS: 30.0</text>
+                        <text x="12" y="95" font-family="Courier, monospace" font-size="9" fill="#64748b">LATENCY: 12MS</text>
                         <line x1="12" y1="110" x2="148" y2="110" stroke="rgba(0,240,255,0.2)" />
                         <text x="12" y="130" font-family="Courier, monospace" font-size="8" fill="var(--accent-color)">> OBJ_01: CUP</text>
                         <text x="12" y="145" font-family="Courier, monospace" font-size="8" fill="var(--accent-color)">  CONF: 0.9841</text>
                         <text x="12" y="165" font-family="Courier, monospace" font-size="8" fill="var(--accent-secondary)">> OBJ_02: KEYBD</text>
                         <text x="12" y="180" font-family="Courier, monospace" font-size="8" fill="var(--accent-secondary)">  CONF: 0.9125</text>
                         <line x1="12" y1="200" x2="148" y2="200" stroke="rgba(0,240,255,0.2)" />
-                        <text x="12" y="225" font-family="Courier, monospace" font-size="8" fill="#555">> RENDER OK</text>
-                        <text x="12" y="240" font-family="Courier, monospace" font-size="8" fill="#555">> AUDIO_SYNCED</text>
+                        <text x="12" y="225" font-family="Courier, monospace" font-size="8" fill="#64748b">> RENDER OK</text>
+                        <text x="12" y="240" font-family="Courier, monospace" font-size="8" fill="#64748b">> AUDIO_SYNCED</text>
                     </g>
                     <text x="30" y="348" font-family="Courier, monospace" font-size="10" fill="var(--accent-color)" opacity="0.8">OPENCV_CORE_MODULE: ENABLED // CLASS_COUNT: 80</text>
                 </svg>
@@ -961,26 +911,26 @@ document.addEventListener("DOMContentLoaded", () => {
                     <rect x="10" y="10" width="580" height="360" rx="6" stroke="var(--accent-color)" stroke-width="1" stroke-dasharray="10 5" fill="none" opacity="0.3" />
                     <text x="30" y="45" font-family="Courier, monospace" font-size="13" fill="var(--accent-color)" font-weight="bold" letter-spacing="1">OCR_MATRIX // TEXT_EXTRACTOR</text>
                     <g transform="translate(30, 75)">
-                        <rect x="0" y="0" width="280" height="215" rx="4" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
-                        <rect x="20" y="20" width="200" height="6" fill="rgba(255,255,255,0.15)" />
-                        <rect x="20" y="35" width="240" height="6" fill="rgba(255,255,255,0.15)" />
-                        <rect x="20" y="50" width="160" height="6" fill="rgba(255,255,255,0.15)" />
+                        <rect x="0" y="0" width="280" height="215" rx="4" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
+                        <rect x="20" y="20" width="200" height="6" fill="rgba(0, 119, 182, 0.08)" />
+                        <rect x="20" y="35" width="240" height="6" fill="rgba(0, 119, 182, 0.08)" />
+                        <rect x="20" y="50" width="160" height="6" fill="rgba(0, 119, 182, 0.08)" />
                         <rect x="15" y="70" width="250" height="35" stroke="var(--accent-color)" stroke-width="1.5" fill="rgba(0,240,255,0.08)" />
                         <text x="25" y="91" font-family="Courier, monospace" font-size="13" fill="var(--accent-color)" font-weight="bold" letter-spacing="2">STEEP ELEVATION AHEAD</text>
-                        <rect x="20" y="125" width="220" height="6" fill="rgba(255,255,255,0.15)" />
-                        <rect x="20" y="140" width="180" height="6" fill="rgba(255,255,255,0.15)" />
-                        <rect x="20" y="155" width="240" height="6" fill="rgba(255,255,255,0.15)" />
-                        <rect x="20" y="170" width="120" height="6" fill="rgba(255,255,255,0.15)" />
+                        <rect x="20" y="125" width="220" height="6" fill="rgba(0, 119, 182, 0.08)" />
+                        <rect x="20" y="140" width="180" height="6" fill="rgba(0, 119, 182, 0.08)" />
+                        <rect x="20" y="155" width="240" height="6" fill="rgba(0, 119, 182, 0.08)" />
+                        <rect x="20" y="170" width="120" height="6" fill="rgba(0, 119, 182, 0.08)" />
                         <line x1="5" y1="100" x2="275" y2="100" stroke="red" stroke-width="1" stroke-dasharray="2 2" opacity="0.7" />
                     </g>
                     <g transform="translate(330, 75)">
-                        <rect x="0" y="0" width="240" height="215" rx="4" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
-                        <text x="15" y="25" font-family="Courier, monospace" font-size="11" fill="#fff" font-weight="bold">EXTRACTED STRING</text>
+                        <rect x="0" y="0" width="240" height="215" rx="4" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
+                        <text x="15" y="25" font-family="Courier, monospace" font-size="11" fill="#0f172a" font-weight="bold">EXTRACTED STRING</text>
                         <line x1="15" y1="32" x2="225" y2="32" stroke="rgba(0,240,255,0.2)" />
                         <rect x="15" y="45" width="210" height="60" rx="3" stroke="rgba(0,240,255,0.15)" fill="rgba(0,240,255,0.02)" />
                         <text x="25" y="70" font-family="Courier, monospace" font-size="10" fill="var(--accent-color)" font-weight="bold">"WARNING: STEEP ELEVATION</text>
                         <text x="25" y="88" font-family="Courier, monospace" font-size="10" fill="var(--accent-color)" font-weight="bold"> AHEAD - PROCEED SLOWLY"</text>
-                        <text x="15" y="135" font-family="Courier, monospace" font-size="10" fill="#fff" font-weight="bold">TTS AUDIO SYNTHESIZER</text>
+                        <text x="15" y="135" font-family="Courier, monospace" font-size="10" fill="#0f172a" font-weight="bold">TTS AUDIO SYNTHESIZER</text>
                         <line x1="15" y1="142" x2="225" y2="142" stroke="rgba(0,240,255,0.2)" />
                         <g transform="translate(20, 160)" fill="var(--accent-color)">
                             <rect x="0" y="10" width="6" height="25" rx="2" />
@@ -1006,37 +956,37 @@ document.addEventListener("DOMContentLoaded", () => {
                     <rect x="10" y="10" width="580" height="360" rx="6" stroke="var(--accent-color)" stroke-width="1" stroke-dasharray="10 5" fill="none" opacity="0.3" />
                     <text x="30" y="45" font-family="Courier, monospace" font-size="13" fill="var(--accent-color)" font-weight="bold" letter-spacing="1">COLOR_MAPPER // RGB_HSL_ANALYSIS</text>
                     <g transform="translate(30, 75)">
-                        <rect x="0" y="0" width="240" height="215" rx="5" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
-                        <circle cx="120" cy="107" r="75" stroke="rgba(0, 240, 255, 0.3)" stroke-width="1" fill="none" />
-                        <circle cx="120" cy="107" r="50" stroke="rgba(0, 240, 255, 0.2)" stroke-width="1" fill="none" />
-                        <line x1="45" y1="107" x2="195" y2="107" stroke="rgba(0, 240, 255, 0.15)" />
-                        <line x1="120" y1="32" x2="120" y2="182" stroke="rgba(0, 240, 255, 0.15)" />
+                        <rect x="0" y="0" width="240" height="215" rx="5" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
+                        <circle cx="120" cy="107" r="75" stroke="rgba(0, 119, 182, 0.3)" stroke-width="1" fill="none" />
+                        <circle cx="120" cy="107" r="50" stroke="rgba(0, 119, 182, 0.2)" stroke-width="1" fill="none" />
+                        <line x1="45" y1="107" x2="195" y2="107" stroke="rgba(0, 119, 182, 0.15)" />
+                        <line x1="120" y1="32" x2="120" y2="182" stroke="rgba(0, 119, 182, 0.15)" />
                         <line x1="120" y1="107" x2="85" y2="72" stroke="var(--accent-color)" stroke-width="2" />
                         <circle cx="85" cy="72" r="5" fill="none" stroke="var(--accent-color)" stroke-width="1.5" class="bp-pulse" />
                         <path d="M 175 107 A 55 55 0 0 1 120 162" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-dasharray="4 4" fill="none" class="bp-rotate-reverse" />
                     </g>
                     <g transform="translate(290, 75)">
-                        <rect x="0" y="0" width="280" height="215" rx="5" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
-                        <text x="15" y="22" font-family="Courier, monospace" font-size="11" fill="#fff" font-weight="bold">HSL DETECT DETAILS</text>
+                        <rect x="0" y="0" width="280" height="215" rx="5" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
+                        <text x="15" y="22" font-family="Courier, monospace" font-size="11" fill="#0f172a" font-weight="bold">HSL DETECT DETAILS</text>
                         <line x1="15" y1="32" x2="265" y2="32" stroke="rgba(0,240,255,0.2)" />
                         <rect x="15" y="45" width="45" height="45" rx="4" fill="var(--accent-color)" stroke="#fff" stroke-width="1" class="bp-pulse" />
-                        <g transform="translate(75, 45)" fill="#bbb" font-family="Courier, monospace" font-size="9">
-                            <text x="0" y="10" font-weight="bold" fill="#fff">HEX CODE: #00F0FF (CYAN)</text>
-                            <text x="0" y="24">HUE: ..... 180 DEG (CYAN)</text>
+                        <g transform="translate(75, 45)" fill="#475569" font-family="Courier, monospace" font-size="9">
+                            <text x="0" y="10" font-weight="bold" fill="#0f172a">HEX CODE: #00F0FF (OCEAN BLUE)</text>
+                            <text x="0" y="24">HUE: ..... 180 DEG (OCEAN BLUE)</text>
                             <text x="0" y="38">SAT: ..... 100%</text>
                             <text x="0" y="52">LIGHT: ... 50%</text>
                         </g>
-                        <text x="15" y="125" font-family="Courier, monospace" font-size="10" fill="#fff" font-weight="bold">RGB DISTRIBUTION GAUGE</text>
+                        <text x="15" y="125" font-family="Courier, monospace" font-size="10" fill="#0f172a" font-weight="bold">RGB DISTRIBUTION GAUGE</text>
                         <line x1="15" y1="132" x2="265" y2="132" stroke="rgba(0,240,255,0.2)" />
-                        <g transform="translate(15, 145)" font-family="Courier, monospace" font-size="8" fill="#999">
+                        <g transform="translate(15, 145)" font-family="Courier, monospace" font-size="8" fill="#475569">
                             <text x="0" y="10">R: 0</text>
-                            <rect x="40" y="2" width="200" height="8" rx="2" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" />
+                            <rect x="40" y="2" width="200" height="8" rx="2" fill="rgba(0, 119, 182, 0.05)" stroke="rgba(0, 119, 182, 0.1)" />
                             <rect x="40" y="2" width="5" height="8" rx="2" fill="red" />
                             <text x="0" y="25">G: 240</text>
-                            <rect x="40" y="17" width="200" height="8" rx="2" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" />
+                            <rect x="40" y="17" width="200" height="8" rx="2" fill="rgba(0, 119, 182, 0.05)" stroke="rgba(0, 119, 182, 0.1)" />
                             <rect x="40" y="17" width="188" height="8" rx="2" fill="green" />
                             <text x="0" y="40">B: 255</text>
-                            <rect x="40" y="32" width="200" height="8" rx="2" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" />
+                            <rect x="40" y="32" width="200" height="8" rx="2" fill="rgba(0, 119, 182, 0.05)" stroke="rgba(0, 119, 182, 0.1)" />
                             <rect x="40" y="32" width="200" height="8" rx="2" fill="blue" />
                         </g>
                     </g>
@@ -1051,27 +1001,27 @@ document.addEventListener("DOMContentLoaded", () => {
                     <rect x="10" y="10" width="580" height="360" rx="6" stroke="var(--accent-color)" stroke-width="1" stroke-dasharray="10 5" fill="none" opacity="0.3" />
                     <text x="30" y="45" font-family="Courier, monospace" font-size="13" fill="var(--accent-color)" font-weight="bold" letter-spacing="1">TELEMETRY_DASH // BIN_STATE_MONITOR</text>
                     <g transform="translate(30, 80)">
-                        <rect x="0" y="0" width="250" height="200" rx="4" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
+                        <rect x="0" y="0" width="250" height="200" rx="4" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
                         <g transform="translate(65, 80)">
                             <circle cx="0" cy="0" r="45" stroke="rgba(0,240,255,0.15)" stroke-width="6" fill="none" />
                             <path d="M -31.8 31.8 A 45 45 0 1 1 31.8 31.8" stroke="var(--accent-color)" stroke-width="6" fill="none" stroke-dasharray="200" stroke-dashoffset="35" />
                             <line x1="0" y1="0" x2="-10" y2="-32" stroke="var(--accent-color)" stroke-width="3.5" stroke-linecap="round" />
-                            <circle cx="0" cy="0" r="5" fill="#fff" />
-                            <text x="0" y="62" font-family="Courier, monospace" font-size="10" fill="#fff" font-weight="bold" text-anchor="middle">BATTERY 84%</text>
+                            <circle cx="0" cy="0" r="5" fill="#0f172a" />
+                            <text x="0" y="62" font-family="Courier, monospace" font-size="10" fill="#0f172a" font-weight="bold" text-anchor="middle">BATTERY 84%</text>
                         </g>
                         <g transform="translate(185, 80)">
                             <circle cx="0" cy="0" r="45" stroke="rgba(0,240,255,0.15)" stroke-width="6" fill="none" />
                             <path d="M -31.8 31.8 A 45 45 0 1 1 31.8 31.8" stroke="var(--accent-secondary)" stroke-width="6" fill="none" stroke-dasharray="200" stroke-dashoffset="65" />
                             <line x1="0" y1="0" x2="25" y2="-20" stroke="var(--accent-secondary)" stroke-width="3.5" stroke-linecap="round" />
-                            <circle cx="0" cy="0" r="5" fill="#fff" />
-                            <text x="0" y="62" font-family="Courier, monospace" font-size="10" fill="#fff" font-weight="bold" text-anchor="middle">SOLAR 18.2V</text>
+                            <circle cx="0" cy="0" r="5" fill="#0f172a" />
+                            <text x="0" y="62" font-family="Courier, monospace" font-size="10" fill="#0f172a" font-weight="bold" text-anchor="middle">SOLAR 18.2V</text>
                         </g>
                         <line x1="20" y1="160" x2="230" y2="160" stroke="rgba(0,240,255,0.2)" />
                         <text x="20" y="182" font-family="Courier, monospace" font-size="9" fill="var(--accent-color)">SOLAR_CELL_STATUS: GENERATING</text>
                     </g>
                     <g transform="translate(300, 80)">
-                        <rect x="0" y="0" width="270" height="200" rx="4" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
-                        <text x="15" y="25" font-family="Courier, monospace" font-size="11" fill="#fff" font-weight="bold">WASTE VOL FILL MATRIX</text>
+                        <rect x="0" y="0" width="270" height="200" rx="4" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
+                        <text x="15" y="25" font-family="Courier, monospace" font-size="11" fill="#0f172a" font-weight="bold">WASTE VOL FILL MATRIX</text>
                         <line x1="15" y1="32" x2="255" y2="32" stroke="rgba(0,240,255,0.2)" />
                         <g transform="translate(25, 50)">
                             <rect x="0" y="0" width="35" height="120" rx="3" stroke="rgba(0,240,255,0.3)" fill="none" />
@@ -1081,10 +1031,10 @@ document.addEventListener("DOMContentLoaded", () => {
                             <line x1="-5" y1="60" x2="0" y2="60" stroke="rgba(0,240,255,0.3)" />
                             <line x1="-5" y1="90" x2="0" y2="90" stroke="rgba(0,240,255,0.3)" />
                             <line x1="-5" y1="120" x2="0" y2="120" stroke="rgba(0,240,255,0.5)" />
-                            <text x="-12" y="5" font-family="Courier, monospace" font-size="8" fill="#888">F</text>
-                            <text x="-12" y="123" font-family="Courier, monospace" font-size="8" fill="#888">E</text>
+                            <text x="-12" y="5" font-family="Courier, monospace" font-size="8" fill="#64748b">F</text>
+                            <text x="-12" y="123" font-family="Courier, monospace" font-size="8" fill="#64748b">E</text>
                         </g>
-                        <g transform="translate(85, 50)" font-family="Courier, monospace" font-size="9" fill="#bbb">
+                        <g transform="translate(85, 50)" font-family="Courier, monospace" font-size="9" fill="#475569">
                             <text x="0" y="15" font-weight="bold" fill="var(--accent-color)">FILL STATUS: 45.4%</text>
                             <text x="0" y="32">DEPTH RADAR: OK</text>
                             <circle cx="5" cy="55" r="4" fill="green" />
@@ -1106,8 +1056,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <rect x="10" y="10" width="580" height="360" rx="6" stroke="var(--accent-color)" stroke-width="1" stroke-dasharray="10 5" fill="none" opacity="0.3" />
                     <text x="30" y="45" font-family="Courier, monospace" font-size="13" fill="var(--accent-color)" font-weight="bold" letter-spacing="1">SERVO_PROXIMITY_DYNAMICS // REAL_TIME_LOG</text>
                     <g transform="translate(30, 75)">
-                        <rect x="0" y="0" width="310" height="215" rx="4" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
-                        <text x="15" y="22" font-family="Courier, monospace" font-size="11" fill="#fff" font-weight="bold">TRIGGER EVENT OSCILLOSCOPE</text>
+                        <rect x="0" y="0" width="310" height="215" rx="4" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
+                        <text x="15" y="22" font-family="Courier, monospace" font-size="11" fill="#0f172a" font-weight="bold">TRIGGER EVENT OSCILLOSCOPE</text>
                         <line x1="15" y1="32" x2="295" y2="32" stroke="rgba(0,240,255,0.2)" />
                         <g transform="translate(20, 50)" stroke="rgba(0,240,255,0.15)" stroke-width="1">
                             <line x1="0" y1="20" x2="260" y2="20" />
@@ -1123,10 +1073,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         </g>
                     </g>
                     <g transform="translate(360, 75)">
-                        <rect x="0" y="0" width="210" height="215" rx="4" stroke="rgba(0, 240, 255, 0.4)" fill="none" />
+                        <rect x="0" y="0" width="210" height="215" rx="4" stroke="rgba(0, 119, 182, 0.4)" fill="none" />
                         <text x="15" y="22" font-family="Courier, monospace" font-size="11" fill="var(--accent-color)" font-weight="bold">TRIGGER LOGS</text>
                         <line x1="15" y1="32" x2="195" y2="32" stroke="rgba(0,240,255,0.2)" />
-                        <g transform="translate(15, 45)" font-family="Courier, monospace" font-size="8" fill="#888">
+                        <g transform="translate(15, 45)" font-family="Courier, monospace" font-size="8" fill="#64748b">
                             <text x="0" y="10" fill="var(--accent-color)">> 08:14:02.103</text>
                             <text x="0" y="21">  RADAR: 10CM APPROACH</text>
                             <text x="0" y="38" fill="var(--accent-color)">> 08:14:02.245</text>
@@ -1338,217 +1288,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // 3D Carousel Engine Setup
-    const cards = document.querySelectorAll('.carousel-card');
-    const dotsContainer = document.querySelector('.carousel-dots');
-    const prevBtn = document.querySelector('.prev-btn');
-    const nextBtn = document.querySelector('.next-btn');
-
-    let activeIndex = 1; // Default to FurryTails (second card)
-
-    // Render Carousel Dots
-    if (dotsContainer) {
-        dotsContainer.innerHTML = '';
-        cards.forEach((card, idx) => {
-            const dot = document.createElement('div');
-            dot.className = `carousel-dot ${idx === activeIndex ? 'active' : ''}`;
-            dot.addEventListener('click', () => {
-                activeIndex = idx;
-                updateCarousel();
-            });
-            dotsContainer.appendChild(dot);
-        });
-    }
-
-    function updateCarousel() {
-        const isMobile = window.innerWidth <= 768;
-
-        // Update active dot
-        const dots = document.querySelectorAll('.carousel-dot');
-        dots.forEach((dot, idx) => {
-            if (idx === activeIndex) dot.classList.add('active');
-            else dot.classList.remove('active');
-        });
-
-        cards.forEach((card, idx) => {
-            card.classList.remove('active');
-
-            if (isMobile) {
-                // Remove inline transforms to let mobile CSS flex/scroll snap work cleanly
-                gsap.killTweensOf(card);
-                gsap.set(card, {
-                    x: 0,
-                    xPercent: 0,
-                    yPercent: 0,
-                    scale: 1,
-                    rotationY: 0,
-                    z: 0,
-                    opacity: 1,
-                    filter: 'none',
-                    clearProps: "all"
-                });
-                return;
-            }
-
-            // Calculations for 3D depth spacing
-            const diff = idx - activeIndex;
-
-            let x = 0;
-            let scale = 0.8;
-            let rotationY = 0;
-            let z = -200;
-            let opacity = 0.6;
-            let zIndex = 5;
-            let filter = 'blur(2px)';
-
-            if (diff === 0) {
-                card.classList.add('active');
-                x = 0;
-                scale = 1.05;
-                rotationY = 0;
-                z = 0;
-                opacity = 1;
-                zIndex = 10;
-                filter = 'blur(0px)';
-            } else if (diff === -1) {
-                x = -320;
-                scale = 0.82;
-                rotationY = 32;
-                z = -150;
-                opacity = 0.65;
-                zIndex = 8;
-                filter = 'blur(1.5px)';
-            } else if (diff === 1) {
-                x = 320;
-                scale = 0.82;
-                rotationY = -32;
-                z = -150;
-                opacity = 0.65;
-                zIndex = 8;
-                filter = 'blur(1.5px)';
-            } else if (diff < -1) {
-                x = -580;
-                scale = 0.68;
-                rotationY = 45;
-                z = -300;
-                opacity = 0.25;
-                zIndex = 4;
-                filter = 'blur(3px)';
-            } else if (diff > 1) {
-                x = 580;
-                scale = 0.68;
-                rotationY = -45;
-                z = -300;
-                opacity = 0.25;
-                zIndex = 4;
-                filter = 'blur(3px)';
-            }
-
-            // Animate using GSAP
-            gsap.to(card, {
-                x: x,
-                scale: scale,
-                rotationY: rotationY,
-                z: z,
-                opacity: opacity,
-                filter: filter,
-                duration: 0.6,
-                ease: "power2.out",
-                overwrite: "auto",
-                onStart: () => {
-                    card.style.zIndex = zIndex;
-                }
-            });
-        });
-    }
-
-    // Carousel Navigation Handlers
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            activeIndex = (activeIndex - 1 + cards.length) % cards.length;
-            updateCarousel();
-        });
-    }
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            activeIndex = (activeIndex + 1) % cards.length;
-            updateCarousel();
-        });
-    }
-
-    // Direct Clicks on side cards to advance, or active card to explore
-    cards.forEach((card, idx) => {
-        card.addEventListener('click', (e) => {
-            if (window.innerWidth > 768) {
-                if (idx !== activeIndex) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    activeIndex = idx;
-                    updateCarousel();
-                } else {
-                    handleProjectClick(card.getAttribute('data-project-id'));
-                }
-            } else {
-                handleProjectClick(card.getAttribute('data-project-id'));
-            }
+    // Project click routing
+    const projectItemsList = document.querySelectorAll('.project-list-item');
+    projectItemsList.forEach(item => {
+        item.addEventListener('click', () => {
+            const projectId = item.getAttribute('data-project-id');
+            if (projectId) handleProjectClick(projectId);
         });
     });
-
-    // Drag/Swipe Interactivity on Desktop Viewport
-    let startX = 0;
-    let isDragging = false;
-    const carouselViewport = document.querySelector('.projects-carousel');
-
-    if (carouselViewport) {
-        carouselViewport.addEventListener('mousedown', (e) => {
-            if (window.innerWidth <= 768) return;
-            startX = e.clientX;
-            isDragging = true;
-        });
-
-        carouselViewport.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const diffX = e.clientX - startX;
-            if (Math.abs(diffX) > 60) {
-                if (diffX > 0) {
-                    activeIndex = (activeIndex - 1 + cards.length) % cards.length;
-                } else {
-                    activeIndex = (activeIndex + 1) % cards.length;
-                }
-                updateCarousel();
-                isDragging = false;
-            }
-        });
-
-        window.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        // Touch swipe fallback
-        carouselViewport.addEventListener('touchstart', (e) => {
-            if (window.innerWidth <= 768) return;
-            startX = e.touches[0].clientX;
-            isDragging = true;
-        });
-
-        carouselViewport.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const diffX = e.touches[0].clientX - startX;
-            if (Math.abs(diffX) > 60) {
-                if (diffX > 0) {
-                    activeIndex = (activeIndex - 1 + cards.length) % cards.length;
-                } else {
-                    activeIndex = (activeIndex + 1) % cards.length;
-                }
-                updateCarousel();
-                isDragging = false;
-            }
-        });
-
-        carouselViewport.addEventListener('touchend', () => {
-            isDragging = false;
-        });
-    }
 
     // Project click routing
     function handleProjectClick(projectId) {
@@ -1574,13 +1321,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const titleElem = document.getElementById('portal-title');
         titleElem.textContent = data.title;
 
-        // Dynamically scale down font size for longer titles to prevent overflow/cutting
-        if (data.title.length >= 9) {
-            titleElem.style.fontSize = '2.0rem';
-        } else if (data.title.length > 7) {
-            titleElem.style.fontSize = '2.2rem';
+        // Dynamically scale down font size for longer titles to prevent wrapping/overflow
+        const titleLen = data.title.length;
+        if (titleLen > 12) {
+            titleElem.style.fontSize = '1.7rem';
+        } else if (titleLen >= 9) {
+            titleElem.style.fontSize = '2.1rem';
         } else {
-            titleElem.style.fontSize = '3.0rem';
+            titleElem.style.fontSize = '2.8rem';
         }
         document.getElementById('portal-meta-role').textContent = data.role;
         document.getElementById('portal-meta-year').textContent = data.year;
@@ -1595,6 +1343,18 @@ document.addEventListener("DOMContentLoaded", () => {
             span.textContent = tag;
             tagsContainer.appendChild(span);
         });
+
+        // Animate tags immediately on portal load
+        gsap.fromTo("#portal-tags .tag",
+            { scale: 0.8, opacity: 0 },
+            {
+                scale: 1,
+                opacity: 1,
+                duration: 0.4,
+                stagger: 0.05,
+                ease: "back.out(1.7)"
+            }
+        );
 
         // Populate links
         const actionsContainer = document.getElementById('portal-actions');
@@ -1778,8 +1538,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Initialize state & listen for scaling changes
-    updateCarousel();
-    window.addEventListener('resize', updateCarousel);
-
+    // Done initializing
 });
