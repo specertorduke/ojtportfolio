@@ -472,8 +472,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.fonts.ready.then(() => {
         fitTextElements();
+        if (typeof updateActiveBubble === 'function') updateActiveBubble();
     });
-    window.addEventListener("resize", fitTextElements);
+    window.addEventListener("resize", () => {
+        fitTextElements();
+        if (typeof updateActiveBubble === 'function') updateActiveBubble();
+    });
 
     // Set initial states for main page elements to prevent flashing
     gsap.set(".navbar", { y: -30, opacity: 0 });
@@ -521,7 +525,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Page Reveal Timeline
     function runMainReveal() {
-        const mainTl = gsap.timeline();
+        const mainTl = gsap.timeline({
+            onComplete: () => {
+                if (typeof updateActiveBubble === 'function') updateActiveBubble();
+            }
+        });
 
         // Navbar
         mainTl.fromTo(".navbar",
@@ -740,24 +748,67 @@ document.addEventListener("DOMContentLoaded", () => {
     const navLinks = document.querySelectorAll(".nav-link");
     const sections = document.querySelectorAll("section[id]");
 
+    // Active bubble logic for iOS-style Camera selector switcher
+    const activeBubble = document.querySelector('.nav-active-bubble');
+    const navLinksContainer = document.querySelector('.nav-links');
+
+    function updateActiveBubble(targetEl) {
+        if (!activeBubble) return;
+        const target = targetEl || document.querySelector('.nav-link.active');
+        if (target) {
+            activeBubble.style.left = `${target.offsetLeft}px`;
+            activeBubble.style.top = `${target.offsetTop}px`;
+            activeBubble.style.width = `${target.offsetWidth}px`;
+            activeBubble.style.height = `${target.offsetHeight}px`;
+            activeBubble.style.opacity = '1';
+        } else {
+            activeBubble.style.opacity = '0';
+        }
+    }
+
     const scrollSpyObserver = new IntersectionObserver((entries) => {
+        let hasChanged = false;
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const id = entry.target.getAttribute("id");
                 navLinks.forEach(link => {
-                    link.classList.remove("active");
                     if (link.getAttribute("href") === `#${id}`) {
-                        link.classList.add("active");
+                        if (!link.classList.contains("active")) {
+                            navLinks.forEach(l => l.classList.remove("active"));
+                            link.classList.add("active");
+                            hasChanged = true;
+                        }
                     }
                 });
             }
         });
+        if (hasChanged) {
+            updateActiveBubble();
+        }
     }, {
         threshold: 0,
         rootMargin: "-40% 0px -50% 0px"
     });
 
     sections.forEach(section => scrollSpyObserver.observe(section));
+
+    // Listen to hover events for active bubble selector
+    if (navLinksContainer) {
+        navLinks.forEach(link => {
+            link.addEventListener('mouseenter', () => {
+                updateActiveBubble(link);
+            });
+        });
+
+        navLinksContainer.addEventListener('mouseleave', () => {
+            updateActiveBubble();
+        });
+    }
+
+    // Initialize active bubble layout
+    setTimeout(() => {
+        updateActiveBubble();
+    }, 200);
 
     // ==========================================
     // 6. 3D PERSPECTIVE CAROUSEL & PORTAL SHOWCASE
