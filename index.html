@@ -320,53 +320,55 @@
     <!-- Project Details Fullscreen Overlay -->
     <div id="project-portal" class="project-portal">
         <div class="portal-overlay"></div>
-        <div class="portal-container glass-panel">
-            <button class="portal-close-btn hover-target" id="portal-close-btn" aria-label="Close Portal">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <div class="portal-content">
-                <!-- Left Column: Details -->
-                <div class="portal-details-col">
-                    <div class="portal-header">
-                        <span class="portal-meta-role" id="portal-meta-role">Lead Developer</span>
-                        <span class="portal-meta-year" id="portal-meta-year">2025</span>
-                    </div>
-                    <h2 class="portal-title" id="portal-title">FurryTails</h2>
-                    <div class="portal-divider"></div>
-                    <p class="portal-desc" id="portal-desc">Project Description goes here.</p>
-
-                    <div class="portal-tech-section">
-                        <h3>Technologies Used</h3>
-                        <div class="tags" id="portal-tags">
-                            <!-- Filled dynamically -->
+        <div class="portal-wrapper">
+            <div class="portal-container glass-panel">
+                <button class="portal-close-btn hover-target" id="portal-close-btn" aria-label="Close Portal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="portal-content">
+                    <!-- Left Column: Details -->
+                    <div class="portal-details-col">
+                        <div class="portal-header">
+                            <span class="portal-meta-role" id="portal-meta-role">Lead Developer</span>
+                            <span class="portal-meta-year" id="portal-meta-year">2025</span>
                         </div>
-                    </div>
+                        <h2 class="portal-title" id="portal-title">FurryTails</h2>
+                        <div class="portal-divider"></div>
+                        <p class="portal-desc" id="portal-desc">Project Description goes here.</p>
 
-                    <div class="portal-actions-section" id="portal-actions">
-                        <!-- Code Link will go here for INSIGHTFUL -->
-                    </div>
-                </div>
-
-                <!-- Right Column: Interactive Slideshow -->
-                <div class="portal-media-col" id="portal-media">
-                    <div class="slideshow-container">
-                        <div class="slideshow-track-wrapper">
-                            <div class="slideshow-track" id="slideshow-track">
-                                <!-- Slides will be injected dynamically -->
+                        <div class="portal-tech-section">
+                            <h3>Technologies Used</h3>
+                            <div class="tags" id="portal-tags">
+                                <!-- Filled dynamically -->
                             </div>
                         </div>
 
-                        <!-- Slideshow Navigation -->
-                        <div class="slideshow-controls">
-                            <button class="slideshow-nav-btn prev-slide hover-target" id="prev-slide"
-                                aria-label="Previous Slide">
-                                <i class="fa-solid fa-angle-left"></i>
-                            </button>
-                            <div class="slideshow-pagination" id="slideshow-pagination"></div>
-                            <button class="slideshow-nav-btn next-slide hover-target" id="next-slide"
-                                aria-label="Next Slide">
-                                <i class="fa-solid fa-angle-right"></i>
-                            </button>
+                        <div class="portal-actions-section" id="portal-actions">
+                            <!-- Code Link will go here for INSIGHTFUL -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Interactive Slideshow -->
+                    <div class="portal-media-col" id="portal-media">
+                        <div class="slideshow-container">
+                            <div class="slideshow-track-wrapper">
+                                <div class="slideshow-track" id="slideshow-track">
+                                    <!-- Slides will be injected dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Slideshow Navigation -->
+                            <div class="slideshow-controls">
+                                <button class="slideshow-nav-btn prev-slide hover-target" id="prev-slide"
+                                    aria-label="Previous Slide">
+                                    <i class="fa-solid fa-angle-left"></i>
+                                </button>
+                                <div class="slideshow-pagination" id="slideshow-pagination"></div>
+                                <button class="slideshow-nav-btn next-slide hover-target" id="next-slide"
+                                    aria-label="Next Slide">
+                                    <i class="fa-solid fa-angle-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -686,20 +686,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const glassPanels = document.querySelectorAll('.glass-panel:not(.navbar)');
     glassPanels.forEach(panel => {
         let tiltTimeout;
+        const eventTarget = panel.parentElement.classList.contains('portal-wrapper') ? panel.parentElement : panel;
         
-        panel.addEventListener('mousemove', (e) => {
+        eventTarget.addEventListener('mousemove', (e) => {
             panel.style.transition = `transform 0.1s ease-out`;
-            const rect = panel.getBoundingClientRect();
+            const rect = eventTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
             
-            // Calculate tilt (max 6 degrees for better readability)
-            const rotateX = ((y - centerY) / centerY) * -6;
-            const rotateY = ((x - centerX) / centerX) * 6;
+            // Calculate tilt (reduced max tilt from 6 to 3 degrees for a gentler, more premium shift)
+            const rotateX = ((y - centerY) / centerY) * -3;
+            const rotateY = ((x - centerX) / centerX) * 3;
             
-            panel.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+            panel.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.005, 1.005, 1.005)`;
             
             clearTimeout(tiltTimeout);
             tiltTimeout = setTimeout(() => {
@@ -708,13 +709,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 800); // Settle back to flat after 800ms of no movement
         });
         
-        panel.addEventListener('mouseleave', () => {
+        eventTarget.addEventListener('mouseleave', () => {
             clearTimeout(tiltTimeout);
             panel.style.transition = `transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)`;
             panel.style.transform = `perspective(1200px) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
         });
         
-        panel.addEventListener('mouseenter', () => {
+        eventTarget.addEventListener('mouseenter', () => {
             panel.style.transition = `transform 0.1s ease-out`;
         });
     });
@@ -1565,6 +1566,13 @@ document.addEventListener("DOMContentLoaded", () => {
         portal.classList.remove('active');
         document.body.style.overflow = '';
         document.body.classList.remove('portal-open');
+        
+        // Clear inline transforms on the portal container to reset it for the next open animation
+        const portalContainer = portal.querySelector('.portal-container');
+        if (portalContainer) {
+            portalContainer.style.transform = '';
+            portalContainer.style.transition = '';
+        }
     }
 
     if (closeBtn) closeBtn.addEventListener('click', closePortal);
