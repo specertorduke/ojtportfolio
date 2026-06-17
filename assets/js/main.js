@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const projectItems = document.querySelectorAll('.project-list-item');
 
     // Setup for mouse coordinates tracking on spotlight elements
-    const spotlightElements = document.querySelectorAll('.navbar, .btn, .social-link');
+    const spotlightElements = document.querySelectorAll('.navbar, .btn, .social-link, .btn-explore');
     spotlightElements.forEach(el => {
         el.addEventListener('mousemove', (e) => {
             const rect = el.getBoundingClientRect();
@@ -42,6 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 gsap.set(cursorDot, { x: mouseX, y: mouseY });
             }
             gsap.set(cursorReveal, { x: mouseX, y: mouseY, xPercent: -50, yPercent: -50 });
+
+            // Set grid spotlight variables
+            const bgBg = document.querySelector('.mesh-background');
+            if (bgBg) {
+                bgBg.style.setProperty('--bg-mouse-x', `${e.clientX}px`);
+                bgBg.style.setProperty('--bg-mouse-y', `${e.clientY}px`);
+            }
         });
 
         // Honors & Certifications Card Hover Reveal State
@@ -96,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // VisionOS snapping/morphing interaction for buttons, links, etc.
-        const snapElements = document.querySelectorAll('.btn, .nav-link, .social-link, #portal-close-btn, .slideshow-nav-btn, .carousel-btn');
+        const snapElements = document.querySelectorAll('.social-link, #portal-close-btn, .slideshow-nav-btn, .carousel-btn');
 
         snapElements.forEach(elem => {
             elem.addEventListener('mouseenter', () => {
@@ -119,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     border: '1px solid rgba(255, 255, 255, 0.65)',
                     boxShadow: '0 4px 15px rgba(0, 0, 0, 0.04)',
                     backdropFilter: 'blur(12px)',
-                    zIndex: 99800, // Put behind element but above other elements
+                    zIndex: 5, // Put behind element but above background
                     duration: 0.35,
                     ease: "power3.out"
                 });
@@ -211,6 +218,19 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
+        // Hide custom pointer on navbar links to avoid cluttering
+        const occludedElements = document.querySelectorAll('.nav-link, .nav-logo a, .btn-explore');
+        occludedElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                gsap.to(cursorOutline, { opacity: 0, duration: 0.2, overwrite: "auto" });
+                gsap.to(cursorDot, { opacity: 0, duration: 0.2, overwrite: "auto" });
+            });
+            el.addEventListener('mouseleave', () => {
+                gsap.to(cursorOutline, { opacity: 1, duration: 0.3, overwrite: "auto" });
+                gsap.to(cursorDot, { opacity: 1, duration: 0.3, overwrite: "auto" });
+            });
+        });
+
         // Honors & Certifications list interaction
         if (certPreview) {
             certItems.forEach(item => {
@@ -241,22 +261,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         overwrite: "auto"
                     });
                     
-                    // Contract outline cursor to act as concentrated magnifying glass / loupe
-                    cursorOutline.classList.add('inspecting');
-                    gsap.to(cursorOutline, {
-                        width: 44,
-                        height: 44,
-                        borderColor: 'rgba(0, 119, 182, 0.6)',
-                        backgroundColor: 'rgba(0, 119, 182, 0.05)',
-                        duration: 0.3,
-                        overwrite: "auto"
-                    });
-                    gsap.to(cursorDot, {
-                        scale: 0.5,
-                        backgroundColor: 'var(--accent-color)',
-                        duration: 0.3,
-                        overwrite: "auto"
-                    });
+                    // Hide the custom cursor completely so it does not block the card details
+                    gsap.to(cursorOutline, { opacity: 0, duration: 0.2, overwrite: "auto" });
+                    gsap.to(cursorDot, { opacity: 0, duration: 0.2, overwrite: "auto" });
                 });
                 
                 item.addEventListener('mouseleave', () => {
@@ -271,25 +278,56 @@ document.addEventListener("DOMContentLoaded", () => {
                         overwrite: "auto"
                     });
                     
-                    // Restore cursor state
-                    cursorOutline.classList.remove('inspecting');
-                    gsap.to(cursorOutline, {
-                        width: 32,
-                        height: 32,
-                        borderColor: 'rgba(0, 119, 182, 0.25)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                        duration: 0.3,
-                        overwrite: "auto"
-                    });
-                    gsap.to(cursorDot, {
-                        scale: 1,
-                        backgroundColor: 'rgba(12, 12, 12, 0.12)',
-                        duration: 0.3,
-                        overwrite: "auto"
-                    });
+                    // Restore custom cursor visibility
+                    gsap.to(cursorOutline, { opacity: 1, duration: 0.3, overwrite: "auto" });
+                    gsap.to(cursorDot, { opacity: 1, duration: 0.3, overwrite: "auto" });
                 });
             });
         }
+
+        // True optical magnifying loupe triggers for text elements
+        const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, .editorial-subtitle, .lead');
+        textElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                // Ignore snapping targets and cert items to avoid conflicts
+                if (el.closest('.btn, .nav-link, .social-link, #portal-close-btn, .slideshow-nav-btn, .carousel-btn, .clean-list li')) return;
+
+                cursorOutline.classList.add('text-magnifying');
+                gsap.to(cursorOutline, {
+                    width: 56,
+                    height: 56,
+                    borderColor: 'rgba(0, 119, 182, 0.4)',
+                    backgroundColor: 'rgba(0, 119, 182, 0.03)',
+                    duration: 0.3,
+                    overwrite: "auto"
+                });
+                gsap.to(cursorDot, {
+                    scale: 0.7,
+                    backgroundColor: 'var(--accent-color)',
+                    duration: 0.3,
+                    overwrite: "auto"
+                });
+            });
+            el.addEventListener('mouseleave', () => {
+                if (el.closest('.btn, .nav-link, .social-link, #portal-close-btn, .slideshow-nav-btn, .carousel-btn, .clean-list li')) return;
+
+                cursorOutline.classList.remove('text-magnifying');
+                gsap.to(cursorOutline, {
+                    width: 32,
+                    height: 32,
+                    borderColor: 'rgba(0, 119, 182, 0.25)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    duration: 0.3,
+                    overwrite: "auto"
+                });
+                gsap.to(cursorDot, {
+                    scale: 1,
+                    backgroundColor: 'rgba(12, 12, 12, 0.12)',
+                    duration: 0.3,
+                    overwrite: "auto"
+                });
+            });
+        });
 
         // Project Image Reveal hover listeners
         projectItems.forEach(item => {
