@@ -77,69 +77,52 @@
         <!-- Animated Sketch Drawings behind the glass overlay -->
         <div class="lockscreen-sketches">
             <div class="lockscreen-sketch sketch-left">
-                <svg viewBox="0 0 400 800" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Grid background -->
-                    <path d="M 50,0 L 50,800 M 150,0 L 150,800 M 250,0 L 250,800" stroke="rgba(255, 255, 255, 0.04)" stroke-width="1" stroke-dasharray="8, 8" />
-                    <path d="M 0,200 L 400,200 M 0,400 L 400,400 M 0,600 L 400,600" stroke="rgba(255, 255, 255, 0.04)" stroke-width="1" stroke-dasharray="8, 8" />
-                    
+                <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Dark Charcoal Gradients to create layered depth in black -->
+                        <linearGradient id="charcoalGradLeft" x1="0" y1="1" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#1e1e1e" />
+                            <stop offset="100%" stop-color="#363636" />
+                        </linearGradient>
+                        <linearGradient id="blackGradLeft" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#121212" />
+                            <stop offset="100%" stop-color="#050505" />
+                        </linearGradient>
+                    </defs>
                     <g class="sketch-group">
-                        <!-- Leftmost wavy design lines (representing creative thoughts) -->
-                        <path d="M -50,150 C 120,180 80,320 200,320 C 320,320 180,500 300,500 C 420,500 280,680 450,700" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.8" stroke-linecap="round" />
-                        <path d="M -48,153 C 122,182 82,318 198,322 C 318,322 182,498 298,502 C 418,502 282,678 448,703" stroke="rgba(0, 119, 182, 0.25)" stroke-width="1.2" stroke-linecap="round" />
+                        <!-- Bottom-left Back Wave (Charcoal) -->
+                        <path class="wave-layer-back" d="M -200,200 C -150,170 -100,170 -50,200 C 0,230 50,230 100,200 C 150,170 200,170 250,200 C 300,230 350,230 400,200 C 450,170 500,170 550,200 C 600,230 650,230 700,200 C 750,170 800,170 850,200 C 900,230 950,230 1000,200 C 1050,170 1100,170 1150,200 C 1200,230 1250,230 1300,200 L 1300,1000 L -200,1000 Z" fill="url(#charcoalGradLeft)" />
                         
-                        <!-- Sketch of a big main idea circle / gear -->
-                        <path d="M 120,350 C 120,280 180,220 250,220 C 320,220 380,280 380,350 C 380,420 320,480 250,480 C 180,480 120,420 120,350 Z" stroke="rgba(255, 255, 255, 0.22)" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M 122,348 C 121,281 179,223 248,221 C 319,219 382,278 379,352 C 376,423 318,478 252,482 C 182,486 123,421 122,348 Z" stroke="rgba(0, 240, 255, 0.2)" stroke-width="1" stroke-linecap="round" />
+                        <!-- Bottom-left Mid Wave (Medium Black with subtle highlight border) -->
+                        <path class="wave-layer-mid" d="M -200,200 C -150,170 -100,170 -50,200 C 0,230 50,230 100,200 C 150,170 200,170 250,200 C 300,230 350,230 400,200 C 450,170 500,170 550,200 C 600,230 650,230 700,200 C 750,170 800,170 850,200 C 900,230 950,230 1000,200 C 1050,170 1100,170 1150,200 C 1200,230 1250,230 1300,200 L 1300,1000 L -200,1000 Z" fill="url(#blackGradLeft)" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1.5" />
                         
-                        <!-- Inner details of gear/compass -->
-                        <circle cx="250" cy="350" r="50" stroke="rgba(255, 255, 255, 0.1)" stroke-dasharray="4, 4" />
-                        <path d="M 250,270 L 250,430 M 170,350 L 330,350" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" />
-                        <circle cx="250" cy="350" r="10" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.2" fill="none" />
-                        
-                        <!-- Vector node points -->
-                        <circle cx="200" cy="320" r="5" fill="rgba(255, 255, 255, 0.45)" />
-                        <circle cx="300" cy="500" r="7" fill="rgba(0, 119, 182, 0.55)" />
-                        <circle cx="250" cy="220" r="4" fill="rgba(0, 240, 255, 0.4)" />
-                        
-                        <!-- Handwritten-like text and arrows -->
-                        <path d="M 170,260 L 120,210 M 120,210 L 140,210 M 120,210 L 120,230" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1.5" />
-                        <text x="110" y="195" fill="rgba(255, 255, 255, 0.35)" font-family="monospace" font-size="11" letter-spacing="1">CONCEPT.DRW</text>
-                        <text x="270" y="325" fill="rgba(255, 255, 255, 0.15)" font-family="monospace" font-size="10">R: 130deg</text>
+                        <!-- Bottom-left Front Wave (Deep Black with strong highlight border) -->
+                        <path class="wave-layer-front" d="M -200,200 C -150,170 -100,170 -50,200 C 0,230 50,230 100,200 C 150,170 200,170 250,200 C 300,230 350,230 400,200 C 450,170 500,170 550,200 C 600,230 650,230 700,200 C 750,170 800,170 850,200 C 900,230 950,230 1000,200 C 1050,170 1100,170 1150,200 C 1200,230 1250,230 1300,200 L 1300,1000 L -200,1000 Z" fill="#000000" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" />
                     </g>
                 </svg>
             </div>
             <div class="lockscreen-sketch sketch-right">
-                <svg viewBox="0 0 400 800" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Grid background -->
-                    <path d="M 150,0 L 150,800 M 250,0 L 250,800 M 350,0 L 350,800" stroke="rgba(255, 255, 255, 0.04)" stroke-width="1" stroke-dasharray="8, 8" />
-                    <path d="M 0,200 L 400,200 M 0,400 L 400,400 M 0,600 L 400,600" stroke="rgba(255, 255, 255, 0.04)" stroke-width="1" stroke-dasharray="8, 8" />
-                    
+                <svg class="mirrored-wave-svg" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Dark Charcoal Gradients to create layered depth in black -->
+                        <linearGradient id="charcoalGradRight" x1="1" y1="1" x2="0" y2="0">
+                            <stop offset="0%" stop-color="#1e1e1e" />
+                            <stop offset="100%" stop-color="#363636" />
+                        </linearGradient>
+                        <linearGradient id="blackGradRight" x1="1" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#121212" />
+                            <stop offset="100%" stop-color="#050505" />
+                        </linearGradient>
+                    </defs>
                     <g class="sketch-group">
-                        <!-- Rightmost wavy lines -->
-                        <path d="M 450,150 C 280,180 320,320 200,320 C 80,320 220,500 100,500 C -20,500 120,680 -50,700" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.8" stroke-linecap="round" />
-                        <path d="M 448,153 C 278,182 318,318 198,322 C 78,322 218,498 98,502 C -18,502 118,678 -48,703" stroke="rgba(0, 240, 255, 0.25)" stroke-width="1.2" stroke-linecap="round" />
+                        <!-- Bottom-right Back Wave (Charcoal) -->
+                        <path class="wave-layer-back" d="M -200,200 C -150,170 -100,170 -50,200 C 0,230 50,230 100,200 C 150,170 200,170 250,200 C 300,230 350,230 400,200 C 450,170 500,170 550,200 C 600,230 650,230 700,200 C 750,170 800,170 850,200 C 900,230 950,230 1000,200 C 1050,170 1100,170 1150,200 C 1200,230 1250,230 1300,200 L 1300,1000 L -200,1000 Z" fill="url(#charcoalGradRight)" />
                         
-                        <!-- Sketch of a coordinate window / wireframe box representing software -->
-                        <path d="M 80,200 L 320,200 L 320,430 L 80,430 Z" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.5" stroke-linejoin="round" />
-                        <path d="M 83,197 L 318,202 L 322,428 L 78,432 Z" stroke="rgba(0, 119, 182, 0.25)" stroke-width="1" stroke-linejoin="round" />
+                        <!-- Bottom-right Mid Wave (Medium Black with subtle highlight border) -->
+                        <path class="wave-layer-mid" d="M -200,200 C -150,170 -100,170 -50,200 C 0,230 50,230 100,200 C 150,170 200,170 250,200 C 300,230 350,230 400,200 C 450,170 500,170 550,200 C 600,230 650,230 700,200 C 750,170 800,170 850,200 C 900,230 950,230 1000,200 C 1050,170 1100,170 1150,200 C 1200,230 1250,230 1300,200 L 1300,1000 L -200,1000 Z" fill="url(#blackGradRight)" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1.5" />
                         
-                        <!-- Handwritten brackets and code concepts inside the sketch -->
-                        <text x="105" y="240" fill="rgba(255, 255, 255, 0.4)" font-family="monospace" font-size="13">class Developer {</text>
-                        <text x="135" y="270" fill="rgba(255, 255, 255, 0.25)" font-family="monospace" font-size="11">passion = "Infinite";</text>
-                        <text x="135" y="295" fill="rgba(0, 119, 182, 0.45)" font-family="monospace" font-size="11">skills = ["HTML", "JS", "CSS"];</text>
-                        <text x="135" y="320" fill="rgba(0, 240, 255, 0.45)" font-family="monospace" font-size="11">internship = "Apple";</text>
-                        <text x="135" y="350" fill="rgba(255, 255, 255, 0.25)" font-family="monospace" font-size="11">code() { return "🚀"; }</text>
-                        <text x="105" y="390" fill="rgba(255, 255, 255, 0.4)" font-family="monospace" font-size="13">}</text>
-                        
-                        <!-- Technical compass markings -->
-                        <circle cx="320" cy="430" r="6" fill="rgba(255, 255, 255, 0.4)" />
-                        <circle cx="200" cy="320" r="5" fill="rgba(0, 240, 255, 0.45)" />
-                        <circle cx="100" cy="500" r="7" fill="rgba(0, 119, 182, 0.55)" />
-                        
-                        <!-- Connecting vector lines -->
-                        <path d="M 100,500 L 200,320" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" stroke-dasharray="4, 4" />
-                        <path d="M 200,320 L 320,430" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" stroke-dasharray="4, 4" />
-                        <text x="240" y="365" fill="rgba(255, 255, 255, 0.2)" font-family="monospace" font-size="10">dist: 156</text>
+                        <!-- Bottom-right Front Wave (Deep Black with strong highlight border) -->
+                        <path class="wave-layer-front" d="M -200,200 C -150,170 -100,170 -50,200 C 0,230 50,230 100,200 C 150,170 200,170 250,200 C 300,230 350,230 400,200 C 450,170 500,170 550,200 C 600,230 650,230 700,200 C 750,170 800,170 850,200 C 900,230 950,230 1000,200 C 1050,170 1100,170 1150,200 C 1200,230 1250,230 1300,200 L 1300,1000 L -200,1000 Z" fill="#000000" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" />
                     </g>
                 </svg>
             </div>
@@ -239,7 +222,7 @@
 
     <main data-scroll-container>
         <!-- Hero Section -->
-        <section id="home" class="hero section" data-scroll-section>
+        <section id="home" class="hero" data-scroll-section>
             <div class="hero-content">
                 <div class="reveal-text">
                     <p class="subtitle">Creative Developer — System Engineer</p>
@@ -260,37 +243,37 @@
                     </a>
                 </div>
             </div>
-        </section>
 
-        <!-- Marquee Divider 1 -->
-        <div class="marquee-wrap" data-scroll-section>
-            <div class="marquee-content">
-                <div class="marquee-item">
-                    <span>✦</span><span>HTML/CSS</span>
-                    <span>✦</span><span>UI/UX DESIGN</span>
-                    <span>✦</span><span>JAVASCRIPT</span>
-                    <span>✦</span><span>PYTHON</span>
-                    <span>✦</span><span>PHP/LARAVEL</span>
-                    <span>✦</span><span>JAVA</span>
-                    <span>✦</span><span>C#</span>
-                    <span>✦</span><span>MYSQL</span>
-                    <span>✦</span><span>DATA ANALYSIS</span>
-                    <span>✦</span><span>CYBERSECURITY</span>
-                </div>
-                <div class="marquee-item">
-                    <span>✦</span><span>HTML/CSS</span>
-                    <span>✦</span><span>UI/UX DESIGN</span>
-                    <span>✦</span><span>JAVASCRIPT</span>
-                    <span>✦</span><span>PYTHON</span>
-                    <span>✦</span><span>PHP/LARAVEL</span>
-                    <span>✦</span><span>JAVA</span>
-                    <span>✦</span><span>C#</span>
-                    <span>✦</span><span>MYSQL</span>
-                    <span>✦</span><span>DATA ANALYSIS</span>
-                    <span>✦</span><span>CYBERSECURITY</span>
+            <!-- Marquee Divider 1 -->
+            <div class="marquee-wrap">
+                <div class="marquee-content">
+                    <div class="marquee-item">
+                        <span>✦</span><span>HTML/CSS</span>
+                        <span>✦</span><span>UI/UX DESIGN</span>
+                        <span>✦</span><span>JAVASCRIPT</span>
+                        <span>✦</span><span>PYTHON</span>
+                        <span>✦</span><span>PHP/LARAVEL</span>
+                        <span>✦</span><span>JAVA</span>
+                        <span>✦</span><span>C#</span>
+                        <span>✦</span><span>MYSQL</span>
+                        <span>✦</span><span>DATA ANALYSIS</span>
+                        <span>✦</span><span>CYBERSECURITY</span>
+                    </div>
+                    <div class="marquee-item">
+                        <span>✦</span><span>HTML/CSS</span>
+                        <span>✦</span><span>UI/UX DESIGN</span>
+                        <span>✦</span><span>JAVASCRIPT</span>
+                        <span>✦</span><span>PYTHON</span>
+                        <span>✦</span><span>PHP/LARAVEL</span>
+                        <span>✦</span><span>JAVA</span>
+                        <span>✦</span><span>C#</span>
+                        <span>✦</span><span>MYSQL</span>
+                        <span>✦</span><span>DATA ANALYSIS</span>
+                        <span>✦</span><span>CYBERSECURITY</span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Profile Section -->
         <section id="about" class="profile section" data-scroll-section>

@@ -672,10 +672,10 @@ body.loading .scroll-indicator {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     text-align: center;
     position: relative;
+    padding-top: 120px;
 }
 
 /* Marquee Separators */
@@ -748,11 +748,15 @@ body.loading .scroll-indicator {
 
 .hero-content {
     max-width: 1000px;
-    margin: 0 auto;
+    margin: auto auto 100px auto;
     padding: 0 5%;
     width: 100%;
     z-index: 2;
     position: relative;
+}
+
+.hero .marquee-wrap {
+    margin: 0;
 }
 
 .hero-bg-text {
@@ -2729,6 +2733,11 @@ p:hover, h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .editorial-
    7a. ADDITIONAL LOCKSCREEN ELEMENTS (WAVES & NOTIFICATIONS)
    ========================================== */
 
+body.lockscreen-locked {
+    overflow: hidden !important;
+    height: 100vh !important;
+}
+
 /* Locked state to hide main portfolio layout completely */
 body.lockscreen-locked .navbar,
 body.lockscreen-locked main,
@@ -2754,8 +2763,8 @@ body.lockscreen-locked #cert-preview {
 
 .lockscreen-sketch {
     position: absolute;
-    top: 0;
-    height: 100%;
+    bottom: 0;
+    height: 400px;
     width: 400px;
     opacity: 0.85;
 }
@@ -2771,32 +2780,72 @@ body.lockscreen-locked #cert-preview {
 .lockscreen-sketch svg {
     width: 100%;
     height: 100%;
+    overflow: visible;
 }
 
-/* Float movement animation for sketches */
-.lockscreen-sketches .sketch-group {
-    transform-origin: 200px 400px;
-    animation: sketchDrift 16s infinite ease-in-out alternate;
+.mirrored-wave-svg {
+    transform: scaleX(-1);
+    transform-origin: center center;
 }
 
-.lockscreen-sketch.sketch-left .sketch-group {
-    animation-delay: 0s;
+.lockscreen-sketch .wave-layer-back {
+    filter: drop-shadow(0 0 15px rgba(0, 119, 182, 0.22));
 }
 
-.lockscreen-sketch.sketch-right .sketch-group {
-    animation-delay: -4s;
+
+/* Impressive fluid wave animation for individual corner wave layers */
+.lockscreen-sketch.sketch-left .wave-layer-back {
+    animation: leftBackWave 8s infinite linear;
+    transform-origin: 0px 200px;
+}
+.lockscreen-sketch.sketch-left .wave-layer-mid {
+    animation: leftMidWave 11s infinite linear;
+    transform-origin: 0px 200px;
+}
+.lockscreen-sketch.sketch-left .wave-layer-front {
+    animation: leftFrontWave 14s infinite linear;
+    transform-origin: 0px 200px;
 }
 
-@keyframes sketchDrift {
-    0% {
-        transform: translateY(0) rotate(0deg) scale(1);
-    }
-    50% {
-        transform: translateY(15px) rotate(1deg) scale(1.02);
-    }
-    100% {
-        transform: translateY(-10px) rotate(-1deg) scale(0.98);
-    }
+.lockscreen-sketch.sketch-right .wave-layer-back {
+    animation: leftBackWave 8s infinite linear;
+    transform-origin: 0px 200px;
+    animation-delay: -3.5s;
+}
+.lockscreen-sketch.sketch-right .wave-layer-mid {
+    animation: leftMidWave 11s infinite linear;
+    transform-origin: 0px 200px;
+    animation-delay: -5s;
+}
+.lockscreen-sketch.sketch-right .wave-layer-front {
+    animation: leftFrontWave 14s infinite linear;
+    transform-origin: 0px 200px;
+    animation-delay: -7s;
+}
+
+/* Left Waves Keyframes (Rotated and Translated for Cartoon Ocean Rolling) */
+@keyframes leftBackWave {
+    0% { transform: rotate(45deg) translate(0, -65px); }
+    25% { transform: rotate(45deg) translate(-75px, -50px); }
+    50% { transform: rotate(45deg) translate(-150px, -75px); }
+    75% { transform: rotate(45deg) translate(-225px, -50px); }
+    100% { transform: rotate(45deg) translate(-300px, -65px); }
+}
+
+@keyframes leftMidWave {
+    0% { transform: rotate(45deg) translate(0, 10px); }
+    25% { transform: rotate(45deg) translate(-75px, -10px); }
+    50% { transform: rotate(45deg) translate(-150px, 15px); }
+    75% { transform: rotate(45deg) translate(-225px, -10px); }
+    100% { transform: rotate(45deg) translate(-300px, 10px); }
+}
+
+@keyframes leftFrontWave {
+    0% { transform: rotate(45deg) translate(0, 50px); }
+    25% { transform: rotate(45deg) translate(-75px, 65px); }
+    50% { transform: rotate(45deg) translate(-150px, 48px); }
+    75% { transform: rotate(45deg) translate(-225px, 65px); }
+    100% { transform: rotate(45deg) translate(-300px, 50px); }
 }
 
 /* Apple-style Liquid Glass Notifications */
@@ -2929,9 +2978,12 @@ body.lockscreen-locked #cert-preview {
 
 /* Adjust responsiveness */
 @media (max-width: 768px) {
-    .lockscreen-sketches,
+    .lockscreen-sketches {
+        display: block !important;
+    }
     .lockscreen-sketch {
-        display: none !important;
+        width: 180px !important;
+        height: 180px !important;
     }
 }
 
