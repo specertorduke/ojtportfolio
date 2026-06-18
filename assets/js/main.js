@@ -33,6 +33,12 @@ document.addEventListener("DOMContentLoaded", () => {
         gsap.set(cursorDot, { xPercent: -50, yPercent: -50 });
         gsap.set(cursorOutline, { xPercent: -50, yPercent: -50 });
 
+        // Show custom cursor on first mouse movement to avoid freezing/getting stuck on load
+        window.addEventListener('mousemove', () => {
+            if (cursorDot) cursorDot.style.display = 'block';
+            if (cursorOutline) cursorOutline.style.display = 'block';
+        }, { once: true });
+
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
@@ -472,12 +478,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.fonts.ready.then(() => {
         fitTextElements();
-        if (typeof updateActiveBubble === 'function') updateActiveBubble();
     });
-    window.addEventListener("resize", () => {
-        fitTextElements();
-        if (typeof updateActiveBubble === 'function') updateActiveBubble();
-    });
+    window.addEventListener("resize", fitTextElements);
 
     // Set initial states for main page elements to prevent flashing
     gsap.set(".navbar", { y: -30, opacity: 0 });
@@ -491,12 +493,41 @@ document.addEventListener("DOMContentLoaded", () => {
     const counterObj = { val: 0 };
     const counterEl = document.querySelector(".intro-counter");
     const progressEl = document.querySelector(".intro-progress-bar");
+
+    function revealLockscreenNotifications() {
+        const notifications = document.querySelectorAll('.apple-notification');
+        if (notifications.length > 0) {
+            gsap.fromTo(notifications, 
+                { y: 30, opacity: 0, scale: 0.95 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    scale: 1,
+                    duration: 0.8,
+                    stagger: 0.2,
+                    ease: "back.out(1.2)",
+                    delay: 0.4
+                }
+            );
+        }
+    }
+
     const introTl = gsap.timeline({
         onComplete: () => {
             document.body.classList.remove("loading");
             const overlay = document.querySelector(".intro-overlay");
             if (overlay) overlay.remove();
-            runMainReveal();
+
+            // Check if lockscreen is active
+            const lockscreenPortal = document.getElementById('lockscreen-portal');
+            if (!lockscreenPortal) {
+                // If lockscreen isn't present, unlock content and reveal main page immediately
+                document.body.classList.remove('lockscreen-locked');
+                runMainReveal();
+            } else {
+                // Stagger reveal recruiter notifications
+                revealLockscreenNotifications();
+            }
         }
     });
 
@@ -525,11 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Page Reveal Timeline
     function runMainReveal() {
-        const mainTl = gsap.timeline({
-            onComplete: () => {
-                if (typeof updateActiveBubble === 'function') updateActiveBubble();
-            }
-        });
+        const mainTl = gsap.timeline();
 
         // Navbar
         mainTl.fromTo(".navbar",
@@ -748,67 +775,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const navLinks = document.querySelectorAll(".nav-link");
     const sections = document.querySelectorAll("section[id]");
 
-    // Active bubble logic for iOS-style Camera selector switcher
-    const activeBubble = document.querySelector('.nav-active-bubble');
-    const navLinksContainer = document.querySelector('.nav-links');
-
-    function updateActiveBubble(targetEl) {
-        if (!activeBubble) return;
-        const target = targetEl || document.querySelector('.nav-link.active');
-        if (target) {
-            activeBubble.style.left = `${target.offsetLeft}px`;
-            activeBubble.style.top = `${target.offsetTop}px`;
-            activeBubble.style.width = `${target.offsetWidth}px`;
-            activeBubble.style.height = `${target.offsetHeight}px`;
-            activeBubble.style.opacity = '1';
-        } else {
-            activeBubble.style.opacity = '0';
-        }
-    }
-
     const scrollSpyObserver = new IntersectionObserver((entries) => {
-        let hasChanged = false;
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const id = entry.target.getAttribute("id");
                 navLinks.forEach(link => {
+                    link.classList.remove("active");
                     if (link.getAttribute("href") === `#${id}`) {
-                        if (!link.classList.contains("active")) {
-                            navLinks.forEach(l => l.classList.remove("active"));
-                            link.classList.add("active");
-                            hasChanged = true;
-                        }
+                        link.classList.add("active");
                     }
                 });
             }
         });
-        if (hasChanged) {
-            updateActiveBubble();
-        }
     }, {
         threshold: 0,
         rootMargin: "-40% 0px -50% 0px"
     });
 
     sections.forEach(section => scrollSpyObserver.observe(section));
-
-    // Listen to hover events for active bubble selector
-    if (navLinksContainer) {
-        navLinks.forEach(link => {
-            link.addEventListener('mouseenter', () => {
-                updateActiveBubble(link);
-            });
-        });
-
-        navLinksContainer.addEventListener('mouseleave', () => {
-            updateActiveBubble();
-        });
-    }
-
-    // Initialize active bubble layout
-    setTimeout(() => {
-        updateActiveBubble();
-    }, 200);
 
     // ==========================================
     // 6. 3D PERSPECTIVE CAROUSEL & PORTAL SHOWCASE
@@ -1634,6 +1618,189 @@ document.addEventListener("DOMContentLoaded", () => {
             closePortal();
         }
     });
+
+    // ==========================================
+    // 7. LIQUID GLASS LOCKSCREEN LOGIC (iOS STYLE)
+    // ==========================================
+    const lockscreenPortal = document.getElementById('lockscreen-portal');
+    const lockscreenGlass = document.querySelector('.lockscreen-glass');
+    const sketchLeft = document.querySelector('.sketch-left');
+    const sketchRight = document.querySelector('.sketch-right');
+ 
+    if (lockscreenPortal && lockscreenGlass) {
+        // Clock and Date updates
+        function updateLockscreenClock() {
+            const clockEl = document.getElementById('lockscreen-clock');
+            const dateEl = document.getElementById('lockscreen-date');
+            const statusTimeEl = document.getElementById('status-time');
+            if (!clockEl) return;
+            
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            
+            clockEl.textContent = `${hours}:${minutes}`;
+            if (statusTimeEl) statusTimeEl.textContent = `${hours}:${minutes}`;
+            
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            if (dateEl) dateEl.textContent = now.toLocaleDateString('en-US', options);
+        }
+        updateLockscreenClock();
+        setInterval(updateLockscreenClock, 1000);
+ 
+        // Language cycling greeting
+        const greetings = [
+            "Hi, I am Zander",
+            "Hola, soy Zander",
+            "Bonjour, je suis Zander",
+            "Ciao, sono Zander"
+        ];
+        let greetingIndex = 0;
+        const greetingEl = document.getElementById('lockscreen-greeting');
+        
+        if (greetingEl) {
+            greetingEl.textContent = greetings[0];
+            greetingEl.classList.add('active');
+            
+            setInterval(() => {
+                greetingEl.classList.remove('active');
+                greetingEl.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    greetingIndex = (greetingIndex + 1) % greetings.length;
+                    greetingEl.textContent = greetings[greetingIndex];
+                    greetingEl.classList.remove('fade-out');
+                    greetingEl.classList.add('active');
+                }, 500);
+            }, 2000);
+        }
+ 
+        // Swipe up gesture mechanics
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+        let lockscreenHeight = window.innerHeight;
+        
+        window.addEventListener('resize', () => {
+            lockscreenHeight = window.innerHeight;
+        });
+        
+        const startDrag = (y) => {
+            startY = y;
+            isDragging = true;
+            lockscreenGlass.style.transition = 'none';
+            if (sketchLeft) sketchLeft.style.transition = 'none';
+            if (sketchRight) sketchRight.style.transition = 'none';
+        };
+        
+        const moveDrag = (y) => {
+            if (!isDragging) return;
+            currentY = y;
+            let diffY = currentY - startY;
+            
+            // Only allow dragging UP
+            if (diffY > 0) diffY = 0;
+            
+            lockscreenGlass.style.transform = `translateY(${diffY}px)`;
+ 
+            // Calculate swipe progress relative to 25% height threshold
+            const maxDistance = lockscreenHeight * 0.25;
+            let progress = Math.min(Math.abs(diffY) / maxDistance, 1);
+ 
+            // Animate sketches based on progress
+            if (sketchLeft && sketchRight) {
+                sketchLeft.style.transform = `translateX(${-progress * 150}px)`;
+                sketchLeft.style.opacity = `${0.85 - progress * 0.85}`;
+                
+                sketchRight.style.transform = `translateX(${progress * 150}px)`;
+                sketchRight.style.opacity = `${0.85 - progress * 0.85}`;
+            }
+        };
+        
+        const endDrag = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            let diffY = currentY - startY;
+            
+            // Threshold is 25% of the screen height
+            const threshold = -lockscreenHeight * 0.25;
+            if (diffY < threshold) {
+                // Unlock: slide away completely off screen
+                lockscreenGlass.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+                lockscreenGlass.style.transform = 'translateY(-105vh)';
+                lockscreenPortal.style.pointerEvents = 'none';
+                
+                // Animate sketches out of view completely
+                if (sketchLeft) {
+                    sketchLeft.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+                    sketchLeft.style.transform = 'translateX(-350px)';
+                    sketchLeft.style.opacity = '0';
+                }
+                if (sketchRight) {
+                    sketchRight.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+                    sketchRight.style.transform = 'translateX(350px)';
+                    sketchRight.style.opacity = '0';
+                }
+ 
+                // Unlock main page content
+                document.body.classList.remove('lockscreen-locked');
+                
+                // Trigger the main page content animations on unlock!
+                runMainReveal();
+                
+                // Hide custom pointer occlusion blocks if any
+                setTimeout(() => {
+                    lockscreenPortal.remove();
+                }, 600);
+            } else {
+                // Snap back down
+                lockscreenGlass.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                lockscreenGlass.style.transform = 'translateY(0)';
+ 
+                // Snap sketches back to resting state
+                if (sketchLeft) {
+                    sketchLeft.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                    sketchLeft.style.transform = 'translateX(0)';
+                    sketchLeft.style.opacity = '0.85';
+                }
+                if (sketchRight) {
+                    sketchRight.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                    sketchRight.style.transform = 'translateX(0)';
+                    sketchRight.style.opacity = '0.85';
+                }
+            }
+        };
+        
+        // Touch events
+        lockscreenGlass.addEventListener('touchstart', (e) => {
+            startDrag(e.touches[0].clientY);
+        }, { passive: true });
+        
+        lockscreenGlass.addEventListener('touchmove', (e) => {
+            moveDrag(e.touches[0].clientY);
+        }, { passive: true });
+        
+        lockscreenGlass.addEventListener('touchend', endDrag);
+        
+        // Mouse events
+        lockscreenGlass.addEventListener('mousedown', (e) => {
+            startDrag(e.clientY);
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                moveDrag(e.clientY);
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                endDrag();
+            }
+        });
+    }
 
     // Done initializing
 });

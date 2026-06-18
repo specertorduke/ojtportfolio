@@ -67,6 +67,7 @@ body::after {
 
 /* Custom Cursor (Apple iPadOS/VisionOS Snapping cursor) */
 .cursor-dot {
+    display: none;
     position: fixed;
     top: 0; left: 0;
     width: 16px; height: 16px;
@@ -80,6 +81,7 @@ body::after {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 .cursor-outline {
+    display: none;
     position: fixed;
     top: 0; left: 0;
     width: 32px; height: 32px;
@@ -231,7 +233,7 @@ body.loading .scroll-indicator {
     width: 100vw;
     height: 100vh;
     background-color: var(--bg-color);
-    z-index: 99990;
+    z-index: 100000;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -644,27 +646,6 @@ body.loading .scroll-indicator {
     display: flex;
     gap: 15px;
     align-items: center;
-    position: relative; /* Anchor for absolute active bubble selector */
-}
-
-.nav-active-bubble {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 0;
-    z-index: 0; /* Behind nav text */
-    pointer-events: none; /* Ignore hover/clicks on the bubble itself */
-    background: rgba(255, 255, 255, 0.15); /* Light frosted base */
-    backdrop-filter: blur(12px) saturate(140%);
-    -webkit-backdrop-filter: blur(12px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.25); /* Micro-thin specular border */
-    border-radius: 24px; /* Perfectly rounded capsule shape */
-    box-shadow: 
-        0 4px 12px rgba(0, 0, 0, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* iOS fluid spring curve */
-    opacity: 0;
 }
 
 .nav-link {
@@ -676,11 +657,10 @@ body.loading .scroll-indicator {
     position: relative;
     padding: 6px 14px;
     border-radius: 20px;
-    z-index: 1; /* Keep text above the active bubble */
     transition: color 0.3s, text-shadow 0.3s;
 }
 
-/* Active nav link capsule accent text style */
+/* Active nav link capsule accent */
 .nav-link.active {
     color: var(--accent-color);
     font-weight: 600;
@@ -2550,6 +2530,191 @@ p:hover, h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .editorial-
     100% { transform: translate(-15px, -8px) scaleY(0.99) skewX(0.5deg); }
 }
 
+/* ==========================================
+   7. LIQUID GLASS LOCKSCREEN OVERLAY (iOS STYLE)
+   ========================================== */
+.lockscreen-portal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99995; /* Above navbar & portal, below custom cursor (99999) */
+    overflow: hidden;
+    pointer-events: auto;
+    background: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.lockscreen-glass {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.02); /* Pure transparent glass base */
+    backdrop-filter: blur(40px) saturate(150%);
+    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 0 30px rgba(255, 255, 255, 0.08),
+        0 20px 50px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 40px 40px;
+    touch-action: none; /* Disable default browser scrolling/bounce */
+    cursor: grab;
+    transform: translateY(0);
+}
+
+.lockscreen-glass:active {
+    cursor: grabbing;
+}
+
+.lockscreen-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    color: var(--text-color);
+}
+
+/* Status Bar mockup */
+.lockscreen-status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0.8;
+    letter-spacing: -0.2px;
+}
+.status-icons {
+    display: flex;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+/* Date and Time formatting */
+.lockscreen-date-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 40px;
+}
+.lockscreen-date {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1.35rem;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+    opacity: 0.9;
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.35);
+}
+.lockscreen-clock {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: clamp(5rem, 15vw, 8.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-top: 5px;
+    letter-spacing: -3px;
+    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Greeting styling */
+.lockscreen-greeting-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+    margin-top: 15px;
+}
+.lockscreen-greeting {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", var(--font-body), sans-serif;
+    font-size: clamp(1.2rem, 3.5vw, 2.2rem);
+    font-weight: 600;
+    text-align: center;
+    text-transform: none; /* Removed uppercase to ensure it fits beautifully on a single line */
+    letter-spacing: -0.5px;
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.35);
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    color: var(--text-color);
+}
+
+.lockscreen-greeting.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.lockscreen-greeting.fade-out {
+    opacity: 0;
+    transform: translateY(-15px);
+}
+
+/* Swipe text and arrow indicators */
+.lockscreen-swipe-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+}
+.swipe-arrow-up {
+    font-size: 1.2rem;
+    animation: bounceSwipe 1.5s infinite alternate ease-in-out;
+    opacity: 0.7;
+}
+.swipe-text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: shimmerSwipe 3s infinite linear;
+    background: linear-gradient(
+        to right,
+        var(--text-color) 20%,
+        var(--accent-color) 40%,
+        var(--text-color) 60%,
+        var(--text-color) 80%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.home-bar {
+    width: 140px;
+    height: 5px;
+    background-color: var(--text-color);
+    border-radius: 10px;
+    opacity: 0.25;
+    margin-top: 15px;
+}
+
+@keyframes bounceSwipe {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
+}
+
+@keyframes shimmerSwipe {
+    to {
+        background-position: 200% center;
+    }
+}
+
 @media (max-width: 768px) {
     .btn-explore {
         padding: 12px 26px;
@@ -2557,5 +2722,226 @@ p:hover, h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .editorial-
     }
     .bg-waves-wrap {
         height: 35vh;
+    }
+}
+
+/* ==========================================
+   7a. ADDITIONAL LOCKSCREEN ELEMENTS (WAVES & NOTIFICATIONS)
+   ========================================== */
+
+/* Locked state to hide main portfolio layout completely */
+body.lockscreen-locked .navbar,
+body.lockscreen-locked main,
+body.lockscreen-locked .scroll-indicator,
+body.lockscreen-locked #cert-preview {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    transition: none !important;
+}
+
+/* Animated Sketch Drawings Behind the glass overlay */
+.lockscreen-sketches {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Behind glass content */
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.lockscreen-sketch {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 400px;
+    opacity: 0.85;
+}
+
+.lockscreen-sketch.sketch-left {
+    left: 0;
+}
+
+.lockscreen-sketch.sketch-right {
+    right: 0;
+}
+
+.lockscreen-sketch svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Float movement animation for sketches */
+.lockscreen-sketches .sketch-group {
+    transform-origin: 200px 400px;
+    animation: sketchDrift 16s infinite ease-in-out alternate;
+}
+
+.lockscreen-sketch.sketch-left .sketch-group {
+    animation-delay: 0s;
+}
+
+.lockscreen-sketch.sketch-right .sketch-group {
+    animation-delay: -4s;
+}
+
+@keyframes sketchDrift {
+    0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+    }
+    50% {
+        transform: translateY(15px) rotate(1deg) scale(1.02);
+    }
+    100% {
+        transform: translateY(-10px) rotate(-1deg) scale(0.98);
+    }
+}
+
+/* Apple-style Liquid Glass Notifications */
+.lockscreen-notifications {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 420px;
+    margin: 15px auto;
+    padding: 20px 10px;
+    z-index: 10;
+    max-height: 42vh;
+    overflow-y: auto;
+    scrollbar-width: none; /* Hide scrollbar for clean UI */
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 8%, #000 92%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 8%, #000 92%, transparent 100%);
+}
+.lockscreen-notifications::-webkit-scrollbar {
+    display: none;
+}
+
+.apple-notification {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 18px;
+    padding: 14px 16px;
+    box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.15), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    opacity: 0; /* Animated via GSAP */
+    transform: translateY(30px) scale(0.95);
+    transition: 
+        background 0.3s ease, 
+        border-color 0.3s ease, 
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+        box-shadow 0.4s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+.apple-notification:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.02) translateY(-2px);
+    box-shadow: 
+        0 12px 35px rgba(0, 0, 0, 0.22), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.notification-app {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notif-app-icon {
+    font-size: 0.95rem;
+    color: var(--accent-color);
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 240, 255, 0.15);
+    border-radius: 5px;
+    padding: 4px;
+}
+
+.notif-app-icon.linkedin-color {
+    color: #0077b5;
+    background: rgba(0, 119, 181, 0.15);
+}
+
+.notif-app-icon.mail-color {
+    color: #ff4a4a;
+    background: rgba(255, 74, 74, 0.15);
+}
+
+.notif-app-name {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+    color: var(--text-color);
+}
+
+.notif-time {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    font-size: 0.7rem;
+    opacity: 0.5;
+    color: var(--text-color);
+}
+
+.notification-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.notif-title {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.notif-desc {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    opacity: 0.8;
+    color: var(--text-color);
+    margin: 0;
+}
+
+/* Adjust responsiveness */
+@media (max-width: 768px) {
+    .lockscreen-sketches,
+    .lockscreen-sketch {
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .lockscreen-notifications {
+        max-width: 90%;
+        margin: 15px auto;
+        gap: 8px;
+    }
+    .apple-notification {
+        padding: 10px 12px;
     }
 }
