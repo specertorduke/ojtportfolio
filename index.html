@@ -22,7 +22,9 @@
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
-<body class="loading lockscreen-locked">
+<body class="loading lockscreen-locked theme-normal">
+    <!-- Global Eye Protection Overlay Tint -->
+    <div id="eye-protection-overlay" class="eye-protection-overlay"></div>
     <!-- Dynamic Mesh Background for Glassmorphism -->
     <div class="mesh-background">
         <div class="mesh-blob blob-1"></div>
@@ -63,12 +65,13 @@
         </div>
     </div>
 
-    <!-- Intro Preloader -->
+    <!-- Intro Preloader (Apple Boot screen style) -->
     <div class="intro-overlay">
         <div class="intro-loader-content">
-            <div class="intro-counter">0%</div>
-            <div class="intro-name">Z. DUHAYLUNGSOD</div>
-            <div class="intro-progress-bar"></div>
+            <div class="intro-logo">ZD.</div>
+            <div class="intro-progress-container">
+                <div class="intro-progress-bar"></div>
+            </div>
         </div>
     </div>
 
@@ -157,6 +160,33 @@
                     <div class="lockscreen-clock" id="lockscreen-clock">09:41</div>
                 </div>
 
+                <!-- Eye Protection Selection Widget (iOS Lockscreen style) -->
+                <div class="lockscreen-widget eye-protection-widget glass-panel">
+                    <div class="widget-header">
+                        <i class="fa-solid fa-eye-slash widget-icon"></i>
+                        <span class="widget-title">Eye Protection Shift</span>
+                    </div>
+                    <div class="theme-selector-segments">
+                        <div class="theme-active-pill"></div>
+                        <button class="theme-segment-btn active" data-theme="normal" aria-label="Normal Mode">
+                            <i class="fa-solid fa-sun"></i>
+                            <span>Normal</span>
+                        </button>
+                        <button class="theme-segment-btn" data-theme="truetone" aria-label="True Tone Mode">
+                            <i class="fa-solid fa-circle-notch"></i>
+                            <span>True Tone</span>
+                        </button>
+                        <button class="theme-segment-btn" data-theme="nightshift" aria-label="Night Shift Mode">
+                            <i class="fa-solid fa-moon"></i>
+                            <span>Night Shift</span>
+                        </button>
+                        <button class="theme-segment-btn" data-theme="dark" aria-label="Dark Mode">
+                            <i class="fa-solid fa-circle-half-stroke"></i>
+                            <span>Dark Mode</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Apple-style Recruit Notifications Stack -->
                 <div class="lockscreen-notifications" id="lockscreen-notifications">
                     <!-- Notification 1 -->
@@ -237,6 +267,10 @@
                 aria-label="Toggle Draw Mode">
                 <i class="fa-solid fa-paint-brush"></i>
                 <span class="nav-brush-badge">NEW</span>
+            </button>
+            <button id="theme-toggle-btn" class="nav-link theme-toggle-btn magnetic hover-target" data-strength="20"
+                aria-label="Toggle Display Themes">
+                <i class="fa-solid fa-display"></i>
             </button>
         </div>
     </nav>
@@ -598,6 +632,51 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liquid Glass Display Settings Panel (iOS Control Center style) -->
+    <div id="theme-panel" class="theme-controls-panel glass-panel">
+        <div class="theme-panel-header">
+            <h3>Display & Brightness</h3>
+            <button id="theme-panel-close" class="theme-panel-close-btn hover-target" aria-label="Close Display Settings">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="theme-panel-body">
+            <!-- Theme selection pills -->
+            <div class="theme-segmented-control">
+                <div class="panel-active-pill"></div>
+                <button class="panel-theme-btn active" data-theme="normal">
+                    <i class="fa-solid fa-sun"></i>
+                    <span>Off</span>
+                </button>
+                <button class="panel-theme-btn" data-theme="truetone">
+                    <i class="fa-solid fa-circle-notch"></i>
+                    <span>True Tone</span>
+                </button>
+                <button class="panel-theme-btn" data-theme="nightshift">
+                    <i class="fa-solid fa-moon"></i>
+                    <span>Night Shift</span>
+                </button>
+                <button class="panel-theme-btn" data-theme="dark">
+                    <i class="fa-solid fa-circle-half-stroke"></i>
+                    <span>Dark</span>
+                </button>
+            </div>
+            
+            <!-- Intensity Slider -->
+            <div class="brightness-slider-container">
+                <div class="slider-header">
+                    <span class="control-label">Eye Care Intensity</span>
+                    <span id="eyecare-intensity-val" class="control-value">100%</span>
+                </div>
+                <div class="ios-slider-wrapper">
+                    <i class="fa-solid fa-eye slider-icon-left"></i>
+                    <input type="range" id="eyecare-intensity-slider" min="30" max="100" value="100" class="brush-range-slider hover-target">
+                    <i class="fa-solid fa-shield-halved slider-icon-right"></i>
                 </div>
             </div>
         </div>

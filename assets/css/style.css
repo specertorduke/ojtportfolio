@@ -225,14 +225,14 @@ body.loading .scroll-indicator {
     .liquid-glass-card, .glass-panel { padding: 25px; }
 }
 
-/* Intro Overlay */
+/* Intro Overlay (Apple macOS / iOS Boot Style) */
 .intro-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: var(--bg-color);
+    background-color: #000000; /* Pure black boot background */
     z-index: 100000;
     display: flex;
     justify-content: center;
@@ -240,55 +240,39 @@ body.loading .scroll-indicator {
     overflow: hidden;
 }
 
-.intro-background-grid {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: 50px 50px;
-    background-image:
-        linear-gradient(to right, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
-    opacity: 0.8;
-    pointer-events: none;
-}
-
 .intro-loader-content {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    align-items: flex-start;
-    padding: 5vw;
-    width: 100%;
-    height: 100%;
+    justify-content: center;
+    align-items: center;
     z-index: 10;
 }
 
-.intro-counter {
+.intro-logo {
     font-family: var(--font-heading);
-    font-size: clamp(4rem, 15vw, 12rem);
+    font-size: clamp(3.2rem, 8vw, 4.5rem);
     font-weight: 800;
-    line-height: 0.8;
-    color: var(--text-color);
+    color: #ffffff; /* White Apple boot style logo */
+    letter-spacing: -2px;
+    margin-bottom: 30px;
+    text-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
 }
 
-.intro-name {
-    font-family: var(--font-body);
-    font-size: clamp(1rem, 2vw, 1.5rem);
-    font-weight: 500;
-    letter-spacing: 2px;
-    margin-top: 10px;
-    color: #666;
+.intro-progress-container {
+    width: clamp(160px, 30vw, 220px);
+    height: 4px;
+    background: rgba(255, 255, 255, 0.22); /* Frosted dark background track */
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
 }
 
 .intro-progress-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 4px;
     width: 0%;
-    background-color: var(--accent-color);
+    height: 100%;
+    background-color: #ffffff; /* White progress slider */
+    border-radius: 10px;
+    transition: width 0.1s ease-out;
 }
 
 /* Intro Typography & Text Elements */
@@ -686,7 +670,6 @@ body.loading .scroll-indicator {
 /* Active nav link capsule accent text style */
 .nav-link.active {
     color: var(--accent-color);
-    font-weight: 600;
     transition: color 0.4s ease;
 }
 
@@ -3456,6 +3439,357 @@ body.lockscreen-locked #cert-preview {
     .brush-toast-notification {
         bottom: 20px;
         left: 20px;
+        width: calc(100% - 40px);
+    }
+}
+
+/* ==========================================
+   8. iOS EYE PROTECTION SYSTEM (TRUE TONE, NIGHT SHIFT, DARK MODE)
+   ========================================== */
+
+/* Global Variable Sets per Theme State */
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.25);
+    --glass-shadow: rgba(0, 0, 0, 0.12);
+}
+
+body.theme-normal {
+    --bg-color: #ffffff;
+    --text-color: #0c0c0c;
+    --accent-color: #0077b6;
+    --accent-secondary: #0c0c0c;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --card-bg: #f9f9f9;
+    --card-border: rgba(0, 0, 0, 0.05);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.25);
+    --glass-shadow: rgba(0, 0, 0, 0.12);
+}
+
+body.theme-truetone {
+    --bg-color: #fdfaf2; /* Soft warm paper tone */
+    --text-color: #1c1a14;
+    --accent-color: #b07010; /* Soft gold-amber tone */
+    --accent-secondary: #2c2820;
+    --border-color: rgba(176, 112, 16, 0.12);
+    --card-bg: #f7f2e6;
+    --card-border: rgba(176, 112, 16, 0.06);
+    --glass-bg: rgba(253, 250, 242, 0.3);
+    --glass-border: rgba(176, 112, 16, 0.2);
+    --glass-shadow: rgba(100, 75, 40, 0.05);
+}
+
+body.theme-nightshift {
+    --bg-color: #fdf3e7; /* Sunset cozy warm tone */
+    --text-color: #331e0b;
+    --accent-color: #d85a04; /* Cozy warm rust orange */
+    --accent-secondary: #3d240d;
+    --border-color: rgba(216, 90, 4, 0.15);
+    --card-bg: #f7e7d6;
+    --card-border: rgba(216, 90, 4, 0.08);
+    --glass-bg: rgba(253, 243, 231, 0.4);
+    --glass-border: rgba(216, 90, 4, 0.25);
+    --glass-shadow: rgba(120, 60, 10, 0.08);
+}
+
+body.theme-dark {
+    --bg-color: #0b0b0d; /* Obsidian dark base */
+    --text-color: #f5f5f7; /* Silver metallic text */
+    --accent-color: #00b4d8; /* High readability neon cyan */
+    --accent-secondary: #f5f5f7;
+    --border-color: rgba(255, 255, 255, 0.12);
+    --card-bg: #151518; /* Dark charcoal card background */
+    --card-border: rgba(255, 255, 255, 0.05);
+    --glass-bg: rgba(20, 20, 24, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-shadow: rgba(0, 0, 0, 0.45);
+}
+
+/* Global transitions for animated theme change */
+body, 
+body .navbar, 
+body main, 
+body section, 
+body p, 
+body h1, 
+body h2, 
+body h3, 
+body h4, 
+body a, 
+body li, 
+body span, 
+body div:not(.cursor-dot):not(.cursor-outline):not(.lockscreen-swipe-indicator):not(.swipe-arrow-up):not(.nav-active-bubble):not(.theme-active-pill):not(.panel-active-pill), 
+body button,
+body svg {
+    transition: 
+        background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        color 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        backdrop-filter 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        fill 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        stroke 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Specific cards / items theme corrections */
+body.theme-dark .navbar {
+    background: rgba(15, 15, 18, 0.35);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+body.theme-dark .project-list-item {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+body.theme-dark .list-item {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+body.theme-dark .marquee-wrap {
+    background: rgba(15, 15, 18, 0.6);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Global Eye Protection Overlay Tint Layer */
+.eye-protection-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100005; /* On top of everything, including loader and custom cursors */
+    pointer-events: none;
+    background-color: transparent;
+    transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Lockscreen Segmented Widget Styling */
+.eye-protection-widget {
+    width: 100%;
+    max-width: 420px;
+    margin: 15px auto;
+    padding: 14px 18px !important;
+    border-radius: 20px !important;
+    z-index: 10;
+}
+
+.widget-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}
+
+.widget-icon {
+    font-size: 0.9rem;
+    color: var(--accent-color);
+}
+
+.widget-title {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-color);
+}
+
+.theme-selector-segments {
+    display: flex;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 2px;
+    border-radius: 12px;
+    position: relative;
+    width: 100%;
+}
+
+/* For dark mode layout segmented control background */
+body.theme-dark .theme-selector-segments,
+body.theme-dark .theme-segmented-control {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.theme-active-pill, .panel-active-pill {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    height: calc(100% - 4px);
+    background: var(--bg-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+    z-index: 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-segment-btn, .panel-theme-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 8px 4px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    border-radius: 10px;
+    opacity: 0.5;
+    transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+.theme-segment-btn.active, .panel-theme-btn.active {
+    opacity: 1;
+    font-weight: 600;
+}
+
+.theme-segment-btn i, .panel-theme-btn i {
+    font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+    .theme-segment-btn span, .panel-theme-btn span {
+        display: none; /* Hide text on small screens, keep only icons to avoid cramming */
+    }
+    .theme-segment-btn, .panel-theme-btn {
+        padding: 12px 4px;
+    }
+}
+
+/* Control Drawer Settings Panel (iOS CC Style) */
+.theme-controls-panel {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 310px;
+    padding: 20px;
+    z-index: 99990;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(30px) scale(0.95);
+    transition: 
+        opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+        visibility 0.4s;
+    pointer-events: none;
+}
+
+.theme-controls-panel.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.theme-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 8px;
+}
+
+body.theme-dark .theme-panel-header {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.theme-panel-header h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.theme-panel-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-panel-close-btn:hover {
+    opacity: 1;
+}
+
+.theme-panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.theme-segmented-control {
+    display: flex;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 2px;
+    border-radius: 12px;
+    position: relative;
+    width: 100%;
+}
+
+.brightness-slider-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.ios-slider-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 8px 12px;
+    border-radius: 12px;
+    width: 100%;
+}
+
+body.theme-dark .ios-slider-wrapper {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.ios-slider-wrapper .slider-icon-left,
+.ios-slider-wrapper .slider-icon-right {
+    font-size: 0.9rem;
+    opacity: 0.6;
+    color: var(--text-color);
+}
+
+.ios-slider-wrapper .brush-range-slider {
+    flex: 1;
+}
+
+/* Theme Toggle Navbar Button Specifics */
+.theme-toggle-btn {
+    background: none !important;
+    border: none !important;
+    color: var(--text-color) !important;
+    padding: 0 10px !important;
+    display: inline-flex !important;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    font-size: 1.15rem;
+    height: 100%;
+}
+
+.theme-toggle-btn.active-mode {
+    color: var(--accent-color) !important;
+    filter: drop-shadow(0 0 6px rgba(0, 180, 216, 0.4));
+}
+
+@media (max-width: 768px) {
+    .theme-controls-panel {
+        bottom: 20px;
+        right: 20px;
         width: calc(100% - 40px);
     }
 }

@@ -419,15 +419,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 2. Magnetic effect for specific elements
+    // 2. Magnetic effect for specific elements (supports touch snap back)
     const magneticElements = document.querySelectorAll('.magnetic');
 
     magneticElements.forEach((elem) => {
+        // Desktop mouse movement triggers magnetic displacement
         elem.addEventListener('mousemove', function (e) {
             const rect = this.getBoundingClientRect();
             const strength = this.getAttribute('data-strength') || 20;
 
-            // Get mouse position relative to element center
+            // Get pointer position relative to element center
             const x = e.clientX - (rect.left + rect.width / 2);
             const y = e.clientY - (rect.top + rect.height / 2);
 
@@ -439,14 +440,37 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        elem.addEventListener('mouseleave', function () {
+        // Touch triggers basic touchmove mapping
+        elem.addEventListener('touchmove', function (e) {
+            const rect = this.getBoundingClientRect();
+            const strength = this.getAttribute('data-strength') || 20;
+            const touch = e.touches[0];
+
+            const x = touch.clientX - (rect.left + rect.width / 2);
+            const y = touch.clientY - (rect.top + rect.height / 2);
+
+            gsap.to(this, {
+                x: x / rect.width * strength,
+                y: y / rect.height * strength,
+                duration: 0.3,
+                ease: "power2.out"
+            });
+        });
+
+        // Common reset trigger function
+        const resetPosition = function () {
             gsap.to(this, {
                 x: 0,
                 y: 0,
                 duration: 0.5,
                 ease: "elastic.out(1, 0.3)"
             });
-        });
+        };
+
+        // Reset elements back to center on pointer leave / touch lift
+        elem.addEventListener('mouseleave', resetPosition);
+        elem.addEventListener('touchend', resetPosition);
+        elem.addEventListener('touchcancel', resetPosition);
     });
 
     // Helper function to split text into inline-block spans for individual animations
@@ -533,9 +557,8 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.set(".hero-cta", { y: 80, opacity: 0 });
     gsap.set(".scroll-indicator", { opacity: 0 });
 
-    // 3. Cinematic Minimal Loader
+    // 3. Cinematic Minimal Loader (Apple Boot Loader style)
     const counterObj = { val: 0 };
-    const counterEl = document.querySelector(".intro-counter");
     const progressEl = document.querySelector(".intro-progress-bar");
 
     function revealLockscreenNotifications() {
@@ -581,7 +604,6 @@ document.addEventListener("DOMContentLoaded", () => {
         duration: 2.2,
         ease: "expo.inOut",
         onUpdate: () => {
-            if (counterEl) counterEl.textContent = Math.floor(counterObj.val) + "%";
             if (progressEl) progressEl.style.width = counterObj.val + "%";
         }
     });
@@ -1782,6 +1804,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const startDrag = (y) => {
             startY = y;
+            currentY = y; // Fix auto-unlock: initialize currentY on mousedown/touchstart
             isDragging = true;
             lockscreenGlass.style.transition = 'none';
             if (sketchLeft) sketchLeft.style.transition = 'none';
@@ -1876,6 +1899,16 @@ document.addEventListener("DOMContentLoaded", () => {
             notificationsContainer.addEventListener('touchend', stopPropagation);
             notificationsContainer.addEventListener('mousedown', stopPropagation);
         }
+
+        // Prevent theme selector widget clicks from dragging the lockscreen
+        const widgets = document.querySelectorAll('.lockscreen-widget');
+        widgets.forEach(widget => {
+            const stopPropagation = (e) => e.stopPropagation();
+            widget.addEventListener('touchstart', stopPropagation, { passive: true });
+            widget.addEventListener('touchmove', stopPropagation, { passive: true });
+            widget.addEventListener('touchend', stopPropagation);
+            widget.addEventListener('mousedown', stopPropagation);
+        });
 
         // Touch events
         lockscreenGlass.addEventListener('touchstart', (e) => {
@@ -2023,6 +2056,14 @@ document.addEventListener("DOMContentLoaded", () => {
             brushToggleBtn.addEventListener('click', () => {
                 const isOpening = !brushPanel.classList.contains('active');
                 brushPanel.classList.toggle('active');
+
+                // Close theme panel if opening brush panel
+                if (isOpening) {
+                    const themePanel = document.getElementById('theme-panel');
+                    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+                    if (themePanel) themePanel.classList.remove('active');
+                    if (themeToggleBtn) themeToggleBtn.classList.remove('active-mode');
+                }
 
                 // If opening panel and drawing is disabled, turn it on automatically for better UX
                 if (isOpening && !isDrawModeEnabled) {
@@ -2222,6 +2263,141 @@ document.addEventListener("DOMContentLoaded", () => {
 
         animateInk();
     }
+
+    // ==========================================
+    // 8. iOS EYE PROTECTION SYSTEM LOGIC
+    // ==========================================
+    let activeTheme = localStorage.getItem('portfolio-theme') || 'normal';
+    let eyecareIntensity = parseInt(localStorage.getItem('eyecare-intensity') || '100', 10);
+
+    const eyeOverlay = document.getElementById('eye-protection-overlay');
+    const intensitySlider = document.getElementById('eyecare-intensity-slider');
+    const intensityVal = document.getElementById('eyecare-intensity-val');
+    const themePanel = document.getElementById('theme-panel');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const themePanelClose = document.getElementById('theme-panel-close');
+    const brushPanel = document.getElementById('brush-panel');
+
+    function updateOverlayTint() {
+        if (!eyeOverlay) return;
+        const opacity = eyecareIntensity / 100;
+        
+        if (activeTheme === 'truetone') {
+            eyeOverlay.style.backgroundColor = `rgba(216, 125, 32, ${0.08 * opacity})`;
+        } else if (activeTheme === 'nightshift') {
+            eyeOverlay.style.backgroundColor = `rgba(227, 100, 20, ${0.16 * opacity})`;
+        } else {
+            eyeOverlay.style.backgroundColor = 'transparent';
+        }
+    }
+
+    function updateSegmentPills() {
+        // Recalculate lockscreen widget active pill layout
+        const activeLockBtn = document.querySelector('.theme-segment-btn.active');
+        const lockPill = document.querySelector('.theme-active-pill');
+        if (activeLockBtn && lockPill) {
+            lockPill.style.left = `${activeLockBtn.offsetLeft}px`;
+            lockPill.style.top = `${activeLockBtn.offsetTop}px`;
+            lockPill.style.width = `${activeLockBtn.offsetWidth}px`;
+            lockPill.style.height = `${activeLockBtn.offsetHeight}px`;
+        }
+
+        // Recalculate Control Center active pill layout
+        const activePanelBtn = document.querySelector('.panel-theme-btn.active');
+        const panelPill = document.querySelector('.panel-active-pill');
+        if (activePanelBtn && panelPill) {
+            panelPill.style.left = `${activePanelBtn.offsetLeft}px`;
+            panelPill.style.top = `${activePanelBtn.offsetTop}px`;
+            panelPill.style.width = `${activePanelBtn.offsetWidth}px`;
+            panelPill.style.height = `${activePanelBtn.offsetHeight}px`;
+        }
+    }
+
+    function setTheme(themeName) {
+        document.body.classList.remove('theme-normal', 'theme-truetone', 'theme-nightshift', 'theme-dark');
+        document.body.classList.add(`theme-${themeName}`);
+
+        // Update active class on lockscreen picker buttons
+        document.querySelectorAll('.theme-segment-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-theme') === themeName);
+        });
+
+        // Update active class on settings drawer segment buttons
+        document.querySelectorAll('.panel-theme-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-theme') === themeName);
+        });
+
+        activeTheme = themeName;
+        localStorage.setItem('portfolio-theme', themeName);
+
+        updateOverlayTint();
+        setTimeout(updateSegmentPills, 40);
+    }
+
+    // Initialize state
+    setTheme(activeTheme);
+    
+    if (intensitySlider) {
+        intensitySlider.value = eyecareIntensity;
+        if (intensityVal) intensityVal.textContent = `${eyecareIntensity}%`;
+        
+        intensitySlider.addEventListener('input', () => {
+            eyecareIntensity = parseInt(intensitySlider.value, 10);
+            if (intensityVal) intensityVal.textContent = `${eyecareIntensity}%`;
+            localStorage.setItem('eyecare-intensity', eyecareIntensity);
+            updateOverlayTint();
+        });
+    }
+
+    // Segment button click listeners on Lockscreen Widget
+    document.querySelectorAll('.theme-segment-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Avoid triggering swipe/lock events on clicking buttons
+            const theme = btn.getAttribute('data-theme');
+            setTheme(theme);
+        });
+    });
+
+    // Segment button click listeners on settings CC drawer
+    document.querySelectorAll('.panel-theme-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const theme = btn.getAttribute('data-theme');
+            setTheme(theme);
+        });
+    });
+
+    // Show/hide Display customizer drawer panel
+    if (themeToggleBtn && themePanel) {
+        themeToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = themePanel.classList.toggle('active');
+            themeToggleBtn.classList.toggle('active-mode', isOpen);
+
+            // Close drawing customize panel if display settings is open
+            if (isOpen && brushPanel) {
+                brushPanel.classList.remove('active');
+                const brushToggleBtn = document.getElementById('brush-toggle-btn');
+                if (brushToggleBtn) brushToggleBtn.classList.remove('active-mode');
+            }
+
+            setTimeout(updateSegmentPills, 40);
+        });
+    }
+
+    if (themePanelClose) {
+        themePanelClose.addEventListener('click', () => {
+            themePanel.classList.remove('active');
+            if (themeToggleBtn) themeToggleBtn.classList.remove('active-mode');
+        });
+    }
+
+    // Realign pills on screen resizing / display changes
+    window.addEventListener('resize', () => {
+        updateSegmentPills();
+    });
+    
+    // Initial realign once the fonts and animations load/reveal
+    setTimeout(updateSegmentPills, 500);
 
     // Done initializing
 });
