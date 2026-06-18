@@ -646,6 +646,28 @@ body.loading .scroll-indicator {
     display: flex;
     gap: 15px;
     align-items: center;
+    position: relative; /* Anchor for absolute active bubble and dot */
+}
+
+/* Liquid glass capsule active indicator */
+.nav-active-bubble {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    z-index: 0; /* Behind nav text */
+    pointer-events: none; /* Ignore hover/clicks on the bubble itself */
+    background: rgba(255, 255, 255, 0.15); /* Light frosted base */
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.25); /* Micro-thin specular border */
+    border-radius: 24px; /* Perfectly rounded capsule shape */
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* iOS fluid spring curve */
+    opacity: 0;
 }
 
 .nav-link {
@@ -657,10 +679,11 @@ body.loading .scroll-indicator {
     position: relative;
     padding: 6px 14px;
     border-radius: 20px;
+    z-index: 1; /* Keep text above the active bubble */
     transition: color 0.3s, text-shadow 0.3s;
 }
 
-/* Active nav link capsule accent */
+/* Active nav link capsule accent text style */
 .nav-link.active {
     color: var(--accent-color);
     font-weight: 600;
@@ -857,7 +880,7 @@ body.loading .scroll-indicator {
     display: block;
     width: 0;
     height: 3px;
-    margin-top: 15px;
+    margin: 15px auto 0 auto;
     background: linear-gradient(90deg, var(--accent-color), var(--accent-secondary), var(--accent-color));
     background-size: 200% 100%;
     border-radius: 2px;
@@ -2242,6 +2265,15 @@ main[data-scroll-container] {
 }
 
 @media (max-width: 768px) {
+    .hero {
+        padding-top: 80px;
+        min-height: 90vh;
+    }
+
+    .hero-content {
+        margin: auto !important;
+    }
+
     .section {
         padding: 80px 0;
     }
@@ -2995,5 +3027,435 @@ body.lockscreen-locked #cert-preview {
     }
     .apple-notification {
         padding: 10px 12px;
+    }
+}
+
+/* --- INTERACTIVE 3D PARALLAX BACKGROUND SKETCH ELEMENTS --- */
+.main-decorations {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+#ripple-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Above background tracks, behind foreground content */
+    pointer-events: none;
+}
+
+.decor-track {
+    position: absolute;
+    will-change: transform;
+}
+
+.decor-item {
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-weight: 700;
+    color: rgba(0, 119, 182, 0.05); /* very subtle blue */
+    opacity: 0.8;
+    will-change: transform;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: color 0.3s ease;
+    user-select: none;
+}
+
+.decor-item svg {
+    width: clamp(80px, 15vw, 150px);
+    height: clamp(80px, 15vw, 150px);
+    color: rgba(0, 119, 182, 0.045);
+}
+
+/* Individual placements along the scroll timeline */
+.decor-1 {
+    top: 15vh;
+    left: 10%;
+    animation: floatDecor1 22s infinite alternate ease-in-out;
+}
+
+.decor-2 {
+    top: 45vh;
+    right: 8%;
+    animation: floatDecor2 28s infinite alternate ease-in-out;
+}
+
+.decor-3 {
+    top: 95vh;
+    left: 6%;
+    animation: floatDecor3 32s infinite alternate ease-in-out;
+}
+
+.decor-4 {
+    top: 160vh;
+    right: 12%;
+    animation: floatDecor1 24s infinite alternate ease-in-out -5s;
+}
+
+.decor-5 {
+    top: 230vh;
+    left: 8%;
+    animation: floatDecor2 30s infinite alternate ease-in-out -10s;
+}
+
+.decor-6 {
+    top: 310vh;
+    right: 6%;
+    animation: floatDecor3 26s infinite alternate ease-in-out -15s;
+}
+
+/* Slow, organic floating animations for background elements */
+@keyframes floatDecor1 {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-30px) rotate(15deg); }
+}
+
+@keyframes floatDecor2 {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(25px) rotate(-12deg); }
+}
+
+@keyframes floatDecor3 {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-20px) rotate(8deg); }
+}
+
+/* --- BRUSH TOGGLER NAVBAR BUTTON --- */
+.brush-toggle-btn {
+    background: none !important;
+    border: none !important;
+    color: var(--text-color) !important;
+    padding: 0 10px !important;
+    display: inline-flex !important;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    font-size: 1.15rem;
+    height: 100%;
+}
+
+.brush-toggle-btn.active-mode {
+    color: var(--accent-color) !important;
+    filter: drop-shadow(0 0 6px rgba(0, 119, 182, 0.4));
+}
+
+.nav-brush-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: #0077b6;
+    color: #ffffff;
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 6px;
+    letter-spacing: 0.2px;
+    box-shadow: 0 0 8px rgba(0, 119, 182, 0.5);
+    animation: badgePulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes badgePulse {
+    0% { transform: scale(1); box-shadow: 0 0 4px rgba(0, 119, 182, 0.4); }
+    100% { transform: scale(1.1); box-shadow: 0 0 10px rgba(0, 119, 182, 0.8); }
+}
+
+/* --- LIQUID GLASS BRUSH CUSTOMIZER PANEL --- */
+.brush-controls-panel {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 290px;
+    padding: 20px;
+    z-index: 99990;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(30px) scale(0.95);
+    transition: 
+        opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+        visibility 0.4s;
+    pointer-events: none;
+}
+
+.brush-controls-panel.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.brush-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 8px;
+}
+
+.brush-panel-header h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.brush-panel-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brush-panel-close-btn:hover {
+    opacity: 1;
+}
+
+.brush-panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.brush-control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brush-control-row.flex-col {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+}
+
+.control-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    opacity: 0.85;
+    color: var(--text-color);
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+.control-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+/* Custom CSS Range Slider */
+.brush-range-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.08);
+    outline: none;
+}
+
+.brush-range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.1s ease;
+}
+
+.brush-range-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.25);
+}
+
+/* CSS Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-toggle {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.08);
+    transition: 0.3s;
+    border-radius: 20px;
+}
+
+.slider-toggle:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.toggle-switch input:checked + .slider-toggle {
+    background-color: var(--accent-color);
+}
+
+.toggle-switch input:checked + .slider-toggle:before {
+    transform: translateX(16px);
+}
+
+/* Color Presets */
+.color-presets {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.color-preset-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    padding: 0;
+}
+
+.color-preset-btn.active {
+    border-color: var(--accent-color);
+    transform: scale(1.1);
+}
+
+.color-preset-btn:hover {
+    transform: scale(1.15);
+}
+
+.custom-color-wrap {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid transparent;
+    cursor: pointer;
+    background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.custom-color-wrap.active {
+    border-color: var(--accent-color);
+    transform: scale(1.1);
+}
+
+.custom-color-wrap:hover {
+    transform: scale(1.15);
+}
+
+.color-picker-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+    opacity: 0; /* Make native control transparent so the conic gradient color wheel shows through */
+}
+
+/* --- LIQUID GLASS TOAST NOTIFICATION --- */
+.brush-toast-notification {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    width: 330px;
+    padding: 12px 18px;
+    z-index: 99995;
+    opacity: 0;
+    transform: translateY(50px) scale(0.95);
+    transition: 
+        opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+        transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.brush-toast-notification.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toast-icon {
+    font-size: 1.1rem;
+    color: var(--accent-color);
+    animation: toastBounce 2s infinite ease-in-out;
+}
+
+.brush-toast-notification p {
+    font-size: 0.8rem;
+    margin: 0;
+    line-height: 1.35;
+    color: var(--text-color);
+}
+
+@keyframes toastBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+@media (max-width: 768px) {
+    .brush-controls-panel {
+        bottom: 20px;
+        right: 20px;
+        width: calc(100% - 40px);
+    }
+    .brush-toast-notification {
+        bottom: 20px;
+        left: 20px;
+        width: calc(100% - 40px);
     }
 }

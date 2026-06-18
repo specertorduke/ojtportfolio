@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Register ScrollTrigger
     gsap.registerPlugin(ScrollTrigger);
 
+    // Toast notification placeholder to show when page is revealed
+    let showBrushToast = null;
+
     // 1. Apple iPadOS/VisionOS Snapping Cursor & Spotlight Tracking
     const cursorDot = document.querySelector('.cursor-dot');
     const cursorOutline = document.querySelector('.cursor-outline');
@@ -368,6 +371,54 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Project Image Reveal for touch/mobile devices (Peek on Touch)
+    if (!window.matchMedia("(pointer: fine)").matches) {
+        projectItems.forEach(item => {
+            item.addEventListener('touchstart', (e) => {
+                const imgSrc = item.getAttribute('data-image');
+                if (imgSrc) {
+                    revealImg.src = imgSrc;
+                    
+                    // Position the reveal card in the middle of the viewport
+                    const centerX = window.innerWidth / 2;
+                    const centerY = window.innerHeight / 2;
+                    
+                    gsap.set(cursorReveal, {
+                        x: centerX,
+                        y: centerY,
+                        xPercent: -50,
+                        yPercent: -50,
+                        position: 'fixed'
+                    });
+
+                    gsap.to(cursorReveal, {
+                        opacity: 1,
+                        scale: 1,
+                        rotation: 0,
+                        duration: 0.3,
+                        ease: "power2.out",
+                        overwrite: "auto"
+                    });
+                }
+            }, { passive: true });
+
+            const hideMobilePreview = () => {
+                gsap.to(cursorReveal, {
+                    opacity: 0,
+                    scale: 0.8,
+                    rotation: -5,
+                    duration: 0.3,
+                    ease: "power2.inOut",
+                    overwrite: "auto"
+                });
+            };
+
+            item.addEventListener('touchend', hideMobilePreview, { passive: true });
+            item.addEventListener('touchcancel', hideMobilePreview, { passive: true });
+            item.addEventListener('touchmove', hideMobilePreview, { passive: true });
+        });
+    }
+
     // 2. Magnetic effect for specific elements
     const magneticElements = document.querySelectorAll('.magnetic');
 
@@ -448,38 +499,31 @@ document.addEventListener("DOMContentLoaded", () => {
             const safeMaxWidth = window.innerWidth * 0.9;
             if (maxWidth > safeMaxWidth || maxWidth === 0) maxWidth = safeMaxWidth;
 
-            // Reset to CSS default
+            // Temporarily set display to inline-block so offsetWidth measures the exact text width
+            line.style.display = "inline-block";
             line.style.fontSize = "";
-            const text = line.textContent;
-            
-            // Create hidden measurer with same font
-            const measurer = document.createElement("span");
-            measurer.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;pointer-events:none;";
-            measurer.style.fontFamily = getComputedStyle(line).fontFamily;
-            measurer.style.fontWeight = getComputedStyle(line).fontWeight;
-            measurer.style.letterSpacing = getComputedStyle(line).letterSpacing;
-            measurer.style.textTransform = "uppercase";
-            measurer.textContent = text;
-            document.body.appendChild(measurer);
-
             let size = parseFloat(getComputedStyle(line).fontSize);
-            measurer.style.fontSize = size + "px";
 
-            // Shrink until text fits (down to 8px if needed)
-            while (measurer.offsetWidth > maxWidth && size > 8) {
-                size -= 1;
-                measurer.style.fontSize = size + "px";
+            // Shrink until the actual element's width fits inside maxWidth (down to 8px if needed)
+            // Measuring offsetWidth on inline-block handles kerning and spacing variations accurately
+            while (line.offsetWidth > maxWidth && size > 8) {
+                size -= 0.5;
+                line.style.fontSize = size + "px";
             }
 
-            document.body.removeChild(measurer);
-            line.style.fontSize = size + "px";
+            // Restore default block display style
+            line.style.display = "";
         });
     }
 
     document.fonts.ready.then(() => {
         fitTextElements();
+        if (typeof updateActiveBubble === 'function') updateActiveBubble();
     });
-    window.addEventListener("resize", fitTextElements);
+    window.addEventListener("resize", () => {
+        fitTextElements();
+        if (typeof updateActiveBubble === 'function') updateActiveBubble();
+    });
 
     // Set initial states for main page elements to prevent flashing
     gsap.set(".navbar", { y: -30, opacity: 0 });
@@ -524,6 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // If lockscreen isn't present, unlock content and reveal main page immediately
                 document.body.classList.remove('lockscreen-locked');
                 runMainReveal();
+                if (typeof showBrushToast === 'function') showBrushToast();
             } else {
                 // Stagger reveal recruiter notifications
                 revealLockscreenNotifications();
@@ -556,7 +601,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Page Reveal Timeline
     function runMainReveal() {
-        const mainTl = gsap.timeline();
+        const mainTl = gsap.timeline({
+            onComplete: () => {
+                if (typeof updateActiveBubble === 'function') updateActiveBubble();
+            }
+        });
 
         // Navbar
         mainTl.fromTo(".navbar",
@@ -775,24 +824,68 @@ document.addEventListener("DOMContentLoaded", () => {
     const navLinks = document.querySelectorAll(".nav-link");
     const sections = document.querySelectorAll("section[id]");
 
+    // Active bubble logic for iOS-style selector switcher
+    const activeBubble = document.querySelector('.nav-active-bubble');
+    const navLinksContainer = document.querySelector('.nav-links');
+
+    function updateActiveBubble(targetEl) {
+        const target = targetEl || document.querySelector('.nav-link.active');
+        if (target) {
+            if (activeBubble) {
+                activeBubble.style.left = `${target.offsetLeft}px`;
+                activeBubble.style.top = `${target.offsetTop}px`;
+                activeBubble.style.width = `${target.offsetWidth}px`;
+                activeBubble.style.height = `${target.offsetHeight}px`;
+                activeBubble.style.opacity = '1';
+            }
+        } else {
+            if (activeBubble) activeBubble.style.opacity = '0';
+        }
+    }
+
     const scrollSpyObserver = new IntersectionObserver((entries) => {
+        let hasChanged = false;
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const id = entry.target.getAttribute("id");
                 navLinks.forEach(link => {
-                    link.classList.remove("active");
                     if (link.getAttribute("href") === `#${id}`) {
-                        link.classList.add("active");
+                        if (!link.classList.contains("active")) {
+                            navLinks.forEach(l => l.classList.remove("active"));
+                            link.classList.add("active");
+                            hasChanged = true;
+                        }
                     }
                 });
             }
         });
+        if (hasChanged) {
+            updateActiveBubble();
+        }
     }, {
         threshold: 0,
         rootMargin: "-40% 0px -50% 0px"
     });
 
     sections.forEach(section => scrollSpyObserver.observe(section));
+
+    // Listen to hover events for active bubble selector
+    if (navLinksContainer) {
+        navLinks.forEach(link => {
+            link.addEventListener('mouseenter', () => {
+                updateActiveBubble(link);
+            });
+        });
+
+        navLinksContainer.addEventListener('mouseleave', () => {
+            updateActiveBubble();
+        });
+    }
+
+    // Initialize active bubble layout after animations/loads
+    setTimeout(() => {
+        updateActiveBubble();
+    }, 200);
 
     // ==========================================
     // 6. 3D PERSPECTIVE CAROUSEL & PORTAL SHOWCASE
@@ -1749,6 +1842,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 // Trigger the main page content animations on unlock!
                 runMainReveal();
+                if (typeof showBrushToast === 'function') showBrushToast();
                 
                 // Hide custom pointer occlusion blocks if any
                 setTimeout(() => {
@@ -1810,6 +1904,323 @@ document.addEventListener("DOMContentLoaded", () => {
                 endDrag();
             }
         });
+    }
+
+    // 8. INTERACTIVE 3D PARALLAX BACKGROUND SKETCH ELEMENTS
+    const decorTracks = document.querySelectorAll('.decor-track');
+    const decorItems = document.querySelectorAll('.decor-item');
+
+    if (decorTracks.length > 0) {
+        // Activate Scroll Parallax using ScrollTrigger
+        decorTracks.forEach(track => {
+            const speed = parseFloat(track.getAttribute('data-speed')) || 0.1;
+            
+            gsap.to(track, {
+                y: () => -window.scrollY * speed * 2.2,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "body",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 0.5
+                }
+            });
+        });
+
+        // Activate Mouse Tracking Parallax (only for fine pointers/desktop)
+        if (window.matchMedia("(pointer: fine)").matches) {
+            window.addEventListener('mousemove', (e) => {
+                const offsetX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+                const offsetY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+
+                decorItems.forEach((item, index) => {
+                    const factorX = (index % 2 === 0 ? 35 : -45) * (1 + (index * 0.15));
+                    const factorY = (index % 2 === 0 ? -35 : 45) * (1 + (index * 0.15));
+                    const rotateFactor = (index % 2 === 0 ? 12 : -12);
+
+                    gsap.to(item, {
+                        x: offsetX * factorX,
+                        y: offsetY * factorY,
+                        rotation: offsetX * rotateFactor,
+                        duration: 1.4,
+                        ease: "power2.out"
+                    });
+                });
+            });
+        }
+    }
+
+    // 9. DISSOLVING PURE BLACK PAINT BRUSH SYSTEM
+    const rippleCanvas = document.getElementById('ripple-canvas');
+    if (rippleCanvas) {
+        const ctx = rippleCanvas.getContext('2d');
+        let ripples = []; // tracks active paint stroke points
+        let mouseX = 0;
+        let mouseY = 0;
+        let lastX = 0;
+        let lastY = 0;
+        let lastTime = Date.now();
+
+        // Brush Customizer State
+        let isDrawModeEnabled = false;
+        const brushConfig = {
+            width: 8,
+            colorTemplate: 'rgba(12, 12, 12, opacity)',
+            fadeSpeed: 0.95 / (6 * 65) // Default based on fade slider value 65 (~0.002435)
+        };
+
+        // Query DOM elements
+        const brushToggleBtn = document.getElementById('brush-toggle-btn');
+        const brushPanel = document.getElementById('brush-panel');
+        const brushPanelClose = document.getElementById('brush-panel-close');
+        const brushEnableChk = document.getElementById('brush-enable-chk');
+        const brushWidthSlider = document.getElementById('brush-width-slider');
+        const brushWidthVal = document.getElementById('brush-width-val');
+        const brushFadeSlider = document.getElementById('brush-fade-slider');
+        const brushFadeVal = document.getElementById('brush-fade-val');
+        const presetButtons = document.querySelectorAll('.color-preset-btn');
+        const colorPicker = document.getElementById('brush-color-picker');
+        const customColorWrap = document.querySelector('.custom-color-wrap');
+        const navBrushBadge = document.querySelector('.nav-brush-badge');
+        const brushToast = document.getElementById('brush-toast');
+
+        // Conversion helper from hex color to RGBA Template
+        function hexToRgbaTemplate(hex) {
+            const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+            hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            if (result) {
+                const r = parseInt(result[1], 16);
+                const g = parseInt(result[2], 16);
+                const b = parseInt(result[3], 16);
+                return `rgba(${r}, ${g}, ${b}, opacity)`;
+            }
+            return 'rgba(12, 12, 12, opacity)';
+        }
+
+        // Display Welcoming Toast
+        showBrushToast = function() {
+            if (brushToast) {
+                brushToast.classList.add('show');
+                setTimeout(() => {
+                    brushToast.classList.remove('show');
+                }, 6000);
+            }
+        };
+
+        // Sync initial state values
+        if (brushWidthSlider && brushWidthVal) {
+            brushWidthVal.textContent = `${brushWidthSlider.value}px`;
+            brushConfig.width = parseInt(brushWidthSlider.value, 10);
+        }
+        if (brushFadeSlider && brushFadeVal) {
+            brushFadeVal.textContent = `${(brushFadeSlider.value / 10).toFixed(1)}s`;
+            brushConfig.fadeSpeed = 0.95 / (6 * brushFadeSlider.value);
+        }
+
+        // Toggle draw customizer panel
+        if (brushToggleBtn && brushPanel) {
+            brushToggleBtn.addEventListener('click', () => {
+                const isOpening = !brushPanel.classList.contains('active');
+                brushPanel.classList.toggle('active');
+
+                // If opening panel and drawing is disabled, turn it on automatically for better UX
+                if (isOpening && !isDrawModeEnabled) {
+                    isDrawModeEnabled = true;
+                    if (brushEnableChk) brushEnableChk.checked = true;
+                    brushToggleBtn.classList.add('active-mode');
+                }
+
+                // Remove the "NEW" badge on first click
+                if (navBrushBadge) {
+                    gsap.to(navBrushBadge, {
+                        opacity: 0,
+                        scale: 0.8,
+                        duration: 0.3,
+                        onComplete: () => navBrushBadge.remove()
+                    });
+                }
+            });
+        }
+
+        // Close panel button
+        if (brushPanelClose && brushPanel) {
+            brushPanelClose.addEventListener('click', () => {
+                brushPanel.classList.remove('active');
+            });
+        }
+
+        // Draw mode checkbox switch
+        if (brushEnableChk) {
+            brushEnableChk.addEventListener('change', () => {
+                isDrawModeEnabled = brushEnableChk.checked;
+                if (isDrawModeEnabled) {
+                    if (brushToggleBtn) brushToggleBtn.classList.add('active-mode');
+                } else {
+                    if (brushToggleBtn) brushToggleBtn.classList.remove('active-mode');
+                }
+            });
+        }
+
+        // Width slider change
+        if (brushWidthSlider && brushWidthVal) {
+            brushWidthSlider.addEventListener('input', () => {
+                const val = brushWidthSlider.value;
+                brushWidthVal.textContent = `${val}px`;
+                brushConfig.width = parseInt(val, 10);
+            });
+        }
+
+        // Fade speed slider change
+        if (brushFadeSlider && brushFadeVal) {
+            brushFadeSlider.addEventListener('input', () => {
+                const val = brushFadeSlider.value;
+                brushFadeVal.textContent = `${(val / 10).toFixed(1)}s`;
+                brushConfig.fadeSpeed = 0.95 / (6 * val);
+            });
+        }
+
+        // Preset color buttons selection
+        presetButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                presetButtons.forEach(b => b.classList.remove('active'));
+                if (customColorWrap) customColorWrap.classList.remove('active');
+                btn.classList.add('active');
+
+                const color = btn.getAttribute('data-color');
+                brushConfig.colorTemplate = color;
+
+                // Sync custom color picker value
+                if (colorPicker) {
+                    if (color.includes('12, 12, 12')) {
+                        colorPicker.value = '#0c0c0c';
+                    } else if (color.includes('0, 119, 182')) {
+                        colorPicker.value = '#0077b6';
+                    } else if (color.includes('0, 180, 216')) {
+                        colorPicker.value = '#00b4d8';
+                    } else if (color.includes('239, 35, 60')) {
+                        colorPicker.value = '#ef233c';
+                    }
+                }
+            });
+        });
+
+        // Custom color picker input
+        if (colorPicker) {
+            colorPicker.addEventListener('input', () => {
+                presetButtons.forEach(b => b.classList.remove('active'));
+                if (customColorWrap) customColorWrap.classList.add('active');
+                const hex = colorPicker.value;
+                brushConfig.colorTemplate = hexToRgbaTemplate(hex);
+            });
+        }
+
+        function resizeCanvas() {
+            const container = rippleCanvas.parentElement;
+            if (container) {
+                rippleCanvas.width = container.clientWidth;
+                rippleCanvas.height = container.clientHeight;
+            }
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const startDrawing = (clientX, clientY) => {
+            const rect = rippleCanvas.getBoundingClientRect();
+            lastX = clientX - rect.left;
+            lastY = clientY - rect.top;
+            lastTime = Date.now();
+        };
+
+        const drawStroke = (clientX, clientY) => {
+            const rect = rippleCanvas.getBoundingClientRect();
+            mouseX = clientX - rect.left;
+            mouseY = clientY - rect.top;
+
+            const now = Date.now();
+            const timeDiff = Math.max(now - lastTime, 1);
+            const dist = Math.hypot(mouseX - lastX, mouseY - lastY);
+            
+            // Tight 2.5px threshold makes the stroke solid and connected
+            if (dist > 2.5 && ripples.length < 850) {
+                const speed = dist / timeDiff;
+                
+                // Velocity-sensitive width scaling: slower = thicker, faster = thinner
+                const speedFactor = Math.min(speed * 1.5, 5) * (brushConfig.width / 8);
+                const maxRadius = brushConfig.width * 1.2;
+                const minRadius = brushConfig.width * 0.4;
+                const radius = Math.max(minRadius, maxRadius - speedFactor);
+
+                ripples.push({
+                    x: mouseX,
+                    y: mouseY,
+                    radius: radius,
+                    opacity: 0.95, // High initial opacity for solid paint look
+                    fadeSpeed: brushConfig.fadeSpeed,
+                    colorTemplate: brushConfig.colorTemplate
+                });
+
+                lastX = mouseX;
+                lastY = mouseY;
+                lastTime = now;
+            }
+        };
+
+        // Track pointer coordinates and draw a continuous, speed-sensitive brush stroke
+        window.addEventListener('mousemove', (e) => {
+            // Only spawn paint points if drawing mode is active
+            if (!isDrawModeEnabled) return;
+            drawStroke(e.clientX, e.clientY);
+        });
+
+        // Initialize drag coordinates on mousedown to avoid speed jumps
+        window.addEventListener('mousedown', (e) => {
+            if (!isDrawModeEnabled) return;
+            startDrawing(e.clientX, e.clientY);
+        });
+
+        // Mobile touch events support
+        window.addEventListener('touchstart', (e) => {
+            if (!isDrawModeEnabled) return;
+            const touch = e.touches[0];
+            startDrawing(touch.clientX, touch.clientY);
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDrawModeEnabled) return;
+            // Prevent standard mobile scrolling so user can draw smoothly
+            e.preventDefault();
+            const touch = e.touches[0];
+            drawStroke(touch.clientX, touch.clientY);
+        }, { passive: false });
+
+        // Paint rendering loop
+        function animateInk() {
+            requestAnimationFrame(animateInk);
+
+            ctx.clearRect(0, 0, rippleCanvas.width, rippleCanvas.height);
+
+            for (let i = ripples.length - 1; i >= 0; i--) {
+                const ink = ripples[i];
+                ink.opacity -= ink.fadeSpeed;
+
+                // Remove point if fully dissolved
+                if (ink.opacity <= 0) {
+                    ripples.splice(i, 1);
+                    continue;
+                }
+
+                // Draw solid paint stroke circles using saved color template
+                ctx.save();
+                ctx.beginPath();
+                ctx.fillStyle = ink.colorTemplate.replace('opacity', ink.opacity);
+                ctx.arc(ink.x, ink.y, ink.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        animateInk();
     }
 
     // Done initializing
