@@ -41,6 +41,8 @@
 html {
     scroll-behavior: smooth;
     background-color: var(--bg-color);
+    overflow-x: hidden;
+    width: 100%;
 }
 
 body {
@@ -52,6 +54,7 @@ body {
     cursor: none;
     /* Hide default cursor */
     position: relative;
+    width: 100%;
 }
 
 /* Subtle Grain Overlay over the whole document for tactile glass feel */
@@ -1527,6 +1530,8 @@ body.portal-open main {
 main[data-scroll-container] {
     position: relative;
     z-index: 10;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 /* Base Utility Classes */
@@ -3791,5 +3796,41 @@ body.theme-dark .ios-slider-wrapper {
         bottom: 20px;
         right: 20px;
         width: calc(100% - 40px);
+    }
+}
+
+@media (max-width: 992px) {
+    .cert-preview {
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        top: 15px;
+        padding: 6px 14px;
+        gap: 0;
+        min-width: unset;
+        width: calc(100% - 30px);
+        max-width: 380px;
+        justify-content: center;
+    }
+    .nav-logo {
+        display: none !important;
+    }
+    .nav-links {
+        width: 100%;
+        justify-content: space-around;
+        gap: 2px;
+    }
+    .nav-link {
+        font-size: 0.75rem;
+        padding: 4px 6px;
+    }
+    .nav-brush-badge {
+        font-size: 0.45rem;
+        padding: 1px 3px;
+        right: -6px;
+        top: -6px;
     }
 }

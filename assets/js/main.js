@@ -244,6 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (certPreview) {
             certItems.forEach(item => {
                 item.addEventListener('mouseenter', (e) => {
+                    if (window.innerWidth <= 992) return;
                     isHoveringCert = true;
                     
                     // Prevent large jumps when card is first revealed
@@ -276,6 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 
                 item.addEventListener('mouseleave', () => {
+                    if (window.innerWidth <= 992) return;
                     isHoveringCert = false;
                     
                     // Animate card exit
@@ -1471,6 +1473,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 {
                     imgSrc: "assets/img/SPASWAB images/won best presenter and best prototype.jpg",
                     caption: "Best Presenter & Best Prototype Award: Presenting the full research poster at the Work Immersion Culminating Program, showcasing the methodology, experimental results, and statistical analysis. Awarded Best Presenter and Best Prototype for the project.",
+                    overlayText: ""
+                }
+            ]
+        },
+        physicslegends: {
+            title: "Physics Legends",
+            role: "Lead Developer",
+            year: "2026",
+            desc: "Developed a gamified educational web application to teach high school and college-level physics. Players solve real-time physics equations—such as free fall kinematics, projectile motion coordinates, and work-energy formulas—to launch attacks and defeat conceptual bosses. Implemented interactive parameter inputs, math equation parsing, dynamic canvas animation logic, real-time health updates, scoring mechanics, and formula helpers to make physics intuitive and engaging.",
+            tags: ["JavaScript", "HTML5 Canvas", "CSS3", "Gamification", "Educational Software"],
+            codeLink: "https://github.com/specertorduke/physics-game-v3",
+            slides: [
+                {
+                    imgSrc: "assets/img/Physics Legends images/main menu.jpg",
+                    caption: "Main Menu Interface: Features an interactive, retro-themed retro game dashboard with options to start the game, read how to play instructions, view formula reference sheets, and check project credits.",
+                    overlayText: ""
+                },
+                {
+                    imgSrc: "assets/img/Physics Legends images/select battle.jpg",
+                    caption: "Battle Selection Screen: Players progress through six specialized levels covering Free Fall, Projectile Motion, Work & Energy, Power & Efficiency, 2D Motion, and Combined Physics.",
+                    overlayText: ""
+                },
+                {
+                    imgSrc: "assets/img/Physics Legends images/gameplay.jpg",
+                    caption: "Gameplay Mechanics: Conceptual challenges require calculating formulas (e.g. free fall duration) to execute attacks. Features interactive UI feedback, custom hints, hero/boss health meters, and combo multipliers.",
                     overlayText: ""
                 }
             ]
