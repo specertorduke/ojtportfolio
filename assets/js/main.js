@@ -1773,6 +1773,16 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         };
         
+        // Prevent notification scrolling from bubbling up and dragging the lockscreen
+        const notificationsContainer = document.querySelector('.lockscreen-notifications');
+        if (notificationsContainer) {
+            const stopPropagation = (e) => e.stopPropagation();
+            notificationsContainer.addEventListener('touchstart', stopPropagation, { passive: true });
+            notificationsContainer.addEventListener('touchmove', stopPropagation, { passive: true });
+            notificationsContainer.addEventListener('touchend', stopPropagation);
+            notificationsContainer.addEventListener('mousedown', stopPropagation);
+        }
+
         // Touch events
         lockscreenGlass.addEventListener('touchstart', (e) => {
             startDrag(e.touches[0].clientY);
