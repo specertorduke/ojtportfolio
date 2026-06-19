@@ -1743,36 +1743,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const activePill = sliderPagination ? sliderPagination.querySelector('.slider-dot-active-pill') : null;
         if (activeDot && activePill) {
             const targetLeft = activeDot.offsetLeft;
-            const direction = activeSliderIndex - (window.lastActiveSliderIndex || 0);
             window.lastActiveSliderIndex = activeSliderIndex;
             
-            let stretchWidth = 24;
-            if (direction !== 0) {
-                gsap.killTweensOf(activePill);
-                
-                // Squash and stretch timeline for sliding dot transition
-                gsap.timeline()
-                    .to(activePill, {
-                        left: targetLeft - (direction > 0 ? 0 : 8),
-                        width: 36, // stretch
-                        duration: 0.2,
-                        ease: "power2.in"
-                    })
-                    .to(activePill, {
-                        left: targetLeft - 8,
-                        width: stretchWidth,
-                        duration: 0.35,
-                        ease: "elastic.out(1, 0.7)"
-                    });
-            } else {
-                gsap.to(activePill, {
-                    left: targetLeft - 8,
-                    width: stretchWidth,
-                    duration: 0.4,
-                    ease: "power3.out",
-                    overwrite: "auto"
-                });
-            }
+            gsap.killTweensOf(activePill);
+            gsap.to(activePill, {
+                left: targetLeft - 8,
+                width: 24,
+                duration: 0.4,
+                ease: "power3.out",
+                overwrite: "auto"
+            });
         }
 
         sliderCards.forEach((card, index) => {

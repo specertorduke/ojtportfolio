@@ -1602,29 +1602,7 @@ body.theme-dark .slider-arrow {
     right: -80px;
 }
 
-/* Slider indicators pagination */
-.slider-pagination-dots {
-    display: flex;
-    gap: 10px;
-    margin-top: 40px;
-    z-index: 10;
-}
-
-.slider-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--border-color);
-    cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.slider-dot.active {
-    width: 30px;
-    border-radius: 5px;
-    background: var(--accent-color);
-    box-shadow: 0 0 10px rgba(0, 180, 216, 0.4);
-}
+/* Slider indicators pagination styles are defined at the end of the file */
 
 /* Adjustments for responsive viewport */
 @media (max-width: 1200px) {
@@ -4301,40 +4279,71 @@ body.theme-dark .clean-list li .item-detail p {
 .slider-pagination-dots {
     display: flex;
     position: relative;
-    background: rgba(0, 0, 0, 0.03);
-    padding: 6px 12px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    padding: 8px 16px;
     border-radius: 20px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--glass-border);
     align-items: center;
     gap: 16px;
-}
-
-body.theme-dark .slider-pagination-dots {
-    background: rgba(255, 255, 255, 0.03);
+    box-shadow: var(--glass-shadow);
+    margin-top: 40px;
+    z-index: 10;
 }
 
 .slider-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--border-color);
+    background: var(--text-color);
+    opacity: 0.25;
     cursor: pointer;
-    z-index: 1;
-    transition: background 0.3s;
+    z-index: 2; /* Sits in front of the active pill glass bubble */
+    transition: opacity 0.3s, background-color 0.3s;
+}
+
+.slider-dot:hover {
+    opacity: 0.55;
 }
 
 .slider-dot.active {
-    background: transparent; /* background hidden since active pill sits under it */
+    opacity: 0.85; /* Active dot is visible in front of the glass pill */
+    background: var(--text-color);
 }
 
 .slider-dot-active-pill {
     position: absolute;
-    height: 12px;
+    height: 20px; /* Frosted glass oblong height enclosing the dot */
     width: 24px;
-    border-radius: 6px;
-    background: var(--accent-color);
-    box-shadow: 0 0 12px rgba(0, 180, 216, 0.4);
-    z-index: 0;
+    border-radius: 10px; /* Oblong rounded shape */
+    background: rgba(255, 255, 255, 0.15); /* Light frosted glass base */
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        0 2px 6px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    z-index: 1; /* Sits behind the dot */
     pointer-events: none;
     left: 0;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    transition: background 0.3s, border-color 0.3s;
+}
+
+/* Theme overrides for the active sliding glass pill to match display mode aesthetics */
+body.theme-dark .slider-dot-active-pill {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.theme-truetone .slider-dot-active-pill {
+    background: rgba(176, 112, 16, 0.15); /* Golden tint glass */
+    border-color: rgba(176, 112, 16, 0.25);
+}
+
+body.theme-nightshift .slider-dot-active-pill {
+    background: rgba(216, 90, 4, 0.15); /* Warm rust orange tint glass */
+    border-color: rgba(216, 90, 4, 0.25);
 }
