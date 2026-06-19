@@ -12,8 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const cursorOutline = document.querySelector('.cursor-outline');
     const cursorReveal = document.querySelector('.cursor-image-reveal');
     const revealImg = document.getElementById('reveal-img');
-    const hoverTargets = document.querySelectorAll('.hover-target, a, button, .project-list-item');
-    const projectItems = document.querySelectorAll('.project-list-item');
+    const hoverTargets = document.querySelectorAll('.hover-target, a, button, .project-slide-card');
+    const projectItems = document.querySelectorAll('.project-slide-card');
 
     // Setup for mouse coordinates tracking on spotlight elements
     const spotlightElements = document.querySelectorAll('.navbar, .btn, .social-link, .btn-explore');
@@ -61,12 +61,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // Honors & Certifications Card Hover Reveal State
-        const certItems = document.querySelectorAll('.clean-list li');
         const certPreview = document.getElementById('cert-preview');
         const cardTitle = document.getElementById('cert-card-title');
         const cardIssuer = document.getElementById('cert-card-issuer');
         const cardYear = document.getElementById('cert-card-year');
         const cardIcon = document.getElementById('cert-card-icon');
+        const cardBadge = certPreview ? certPreview.querySelector('.cert-card-badge') : null;
         
         let isHoveringCert = false;
         let certCardX = 0;
@@ -86,14 +86,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Cert card tracking with inertia and 3D tilt
             if (isHoveringCert && certPreview) {
-                // Slower follow rate (0.12) gives a premium, heavy floating feel
                 certCardX += (mouseX - certCardX) * 0.12;
                 certCardY += (mouseY - certCardY) * 0.12;
                 
                 const diffX = mouseX - certCardX;
                 const diffY = mouseY - certCardY;
                 
-                // Physics-based tilt relative to lag distance
                 const tiltX = -diffY * 0.15;
                 const tiltY = diffX * 0.15;
                 
@@ -112,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // VisionOS snapping/morphing interaction for buttons, links, etc.
-        const snapElements = document.querySelectorAll('.social-link, #portal-close-btn, .slideshow-nav-btn, .carousel-btn');
+        const snapElements = document.querySelectorAll('.social-link, #portal-close-btn, .slideshow-nav-btn, .carousel-btn, .slider-dot');
 
         snapElements.forEach(elem => {
             elem.addEventListener('mouseenter', () => {
@@ -240,9 +238,15 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // Honors & Certifications list interaction
-        if (certPreview) {
-            certItems.forEach(item => {
+        let isCertPreviewActiveMobile = false;
+        let lastClickedCertItem = null;
+
+        // Honors & Certifications list interaction - Only for data-verify="true" certifications
+        function bindCertHoverListeners() {
+            const items = document.querySelectorAll('.cert-item[data-verify="true"]');
+            if (!certPreview) return;
+            
+            items.forEach(item => {
                 item.addEventListener('mouseenter', (e) => {
                     if (window.innerWidth <= 992) return;
                     isHoveringCert = true;
@@ -260,6 +264,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (cardIcon) {
                         const iconClass = item.getAttribute('data-icon') || 'fa-award';
                         cardIcon.className = `fa-solid ${iconClass} cert-card-icon`;
+                    }
+                    if (cardBadge) {
+                        cardBadge.innerHTML = '<i class="fa-brands fa-linkedin"></i> CLICK TO VERIFY CREDENTIAL';
+                        cardBadge.style.color = '#00b4d8'; /* custom blue/cyan tint */
+                        cardBadge.style.borderColor = 'rgba(0, 180, 216, 0.4)';
                     }
                     
                     // Animate card entrance
@@ -293,7 +302,105 @@ document.addEventListener("DOMContentLoaded", () => {
                     gsap.to(cursorOutline, { opacity: 1, duration: 0.3, overwrite: "auto" });
                     gsap.to(cursorDot, { opacity: 1, duration: 0.3, overwrite: "auto" });
                 });
+
+                // Redirect to LinkedIn in new tab when clicked (or toggle modal preview on mobile)
+                item.addEventListener('click', (e) => {
+                    if (window.innerWidth <= 992) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        // If user clicked a different cert item, switch the active item and show details
+                        if (lastClickedCertItem !== item) {
+                            lastClickedCertItem = item;
+                            isCertPreviewActiveMobile = true;
+
+                            // Update content
+                            if (cardTitle) cardTitle.textContent = item.getAttribute('data-title') || '';
+                            if (cardIssuer) cardIssuer.textContent = item.getAttribute('data-issuer') || '';
+                            if (cardYear) cardYear.textContent = item.getAttribute('data-year') || '';
+                            if (cardIcon) {
+                                const iconClass = item.getAttribute('data-icon') || 'fa-award';
+                                cardIcon.className = `fa-solid ${iconClass} cert-card-icon`;
+                            }
+                            if (cardBadge) {
+                                cardBadge.innerHTML = '<i class="fa-brands fa-linkedin"></i> TAP AGAIN TO VERIFY';
+                                cardBadge.style.color = '#00b4d8';
+                                cardBadge.style.borderColor = 'rgba(0, 180, 216, 0.4)';
+                            }
+
+                            // Clean any inline transforms from cursor tracking
+                            gsap.set(certPreview, {
+                                xPercent: -50,
+                                yPercent: -50,
+                                x: 0,
+                                y: 0,
+                                rotationX: 0,
+                                rotationY: 0
+                            });
+
+                            // Animate card entrance
+                            gsap.to(certPreview, {
+                                opacity: 1,
+                                scale: 1,
+                                duration: 0.4,
+                                ease: "power3.out"
+                            });
+                        } else {
+                            // Tap again to verify credential
+                            window.open('https://www.linkedin.com/in/zander-duhaylungsod-308846315/', '_blank');
+                            
+                            // Hide preview card
+                            gsap.to(certPreview, {
+                                opacity: 0,
+                                scale: 0.8,
+                                duration: 0.3,
+                                ease: "power3.inOut"
+                            });
+                            lastClickedCertItem = null;
+                            isCertPreviewActiveMobile = false;
+                        }
+                    } else {
+                        // Desktop immediate redirect
+                        window.open('https://www.linkedin.com/in/zander-duhaylungsod-308846315/', '_blank');
+                    }
+                });
             });
+
+            // Let tapping the preview card itself also redirect to LinkedIn on mobile
+            certPreview.addEventListener('click', (e) => {
+                if (window.innerWidth <= 992 && isCertPreviewActiveMobile) {
+                    window.open('https://www.linkedin.com/in/zander-duhaylungsod-308846315/', '_blank');
+                    gsap.to(certPreview, {
+                        opacity: 0,
+                        scale: 0.8,
+                        duration: 0.3,
+                        ease: "power3.inOut"
+                    });
+                    lastClickedCertItem = null;
+                    isCertPreviewActiveMobile = false;
+                }
+            });
+
+            // Tap outside to close preview modal on mobile devices
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 992 && isCertPreviewActiveMobile) {
+                    if (!e.target.closest('.cert-item') && !e.target.closest('#cert-preview')) {
+                        gsap.to(certPreview, {
+                            opacity: 0,
+                            scale: 0.8,
+                            duration: 0.3,
+                            ease: "power3.inOut"
+                        });
+                        lastClickedCertItem = null;
+                        isCertPreviewActiveMobile = false;
+                    }
+                }
+            });
+        }
+        
+        // Initial binding
+        if (certPreview) {
+            bindCertHoverListeners();
         }
 
         // True optical magnifying loupe triggers for text elements
@@ -340,84 +447,44 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // Project Image Reveal hover listeners
-        projectItems.forEach(item => {
-            item.addEventListener('mouseenter', () => {
-                const imgSrc = item.getAttribute('data-image');
-                if (imgSrc) {
-                    revealImg.src = imgSrc;
-                    gsap.to(cursorReveal, {
-                        opacity: 1,
-                        scale: 1,
-                        rotation: 0,
-                        duration: 0.4,
-                        ease: "power3.out",
-                        overwrite: "auto"
-                    });
-                    gsap.to(cursorDot, { opacity: 0, duration: 0.2 });
-                    gsap.to(cursorOutline, { opacity: 0, duration: 0.2 });
-                }
-            });
-            item.addEventListener('mouseleave', () => {
-                gsap.to(cursorReveal, {
-                    opacity: 0,
-                    scale: 0.8,
-                    rotation: -5,
-                    duration: 0.4,
-                    ease: "power3.out",
-                    overwrite: "auto"
-                });
-                gsap.to(cursorDot, { opacity: 1, duration: 0.2 });
-                gsap.to(cursorOutline, { opacity: 1, duration: 0.2 });
-            });
-        });
-    }
-
-    // Project Image Reveal for touch/mobile devices (Peek on Touch)
-    if (!window.matchMedia("(pointer: fine)").matches) {
-        projectItems.forEach(item => {
-            item.addEventListener('touchstart', (e) => {
-                const imgSrc = item.getAttribute('data-image');
-                if (imgSrc) {
-                    revealImg.src = imgSrc;
-                    
-                    // Position the reveal card in the middle of the viewport
-                    const centerX = window.innerWidth / 2;
-                    const centerY = window.innerHeight / 2;
-                    
-                    gsap.set(cursorReveal, {
-                        x: centerX,
-                        y: centerY,
-                        xPercent: -50,
-                        yPercent: -50,
-                        position: 'fixed'
-                    });
-
-                    gsap.to(cursorReveal, {
-                        opacity: 1,
-                        scale: 1,
-                        rotation: 0,
+        // Project Cards custom cursor hover styling (no need for image reveal hover)
+        projectItems.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                if (card.classList.contains('active')) {
+                    cursorOutline.classList.add('text-magnifying');
+                    gsap.to(cursorOutline, {
+                        width: 70,
+                        height: 70,
+                        borderColor: 'rgba(0, 180, 216, 0.5)',
+                        backgroundColor: 'rgba(0, 180, 216, 0.05)',
                         duration: 0.3,
-                        ease: "power2.out",
+                        overwrite: "auto"
+                    });
+                    gsap.to(cursorDot, {
+                        scale: 0.5,
+                        backgroundColor: 'var(--accent-color)',
+                        duration: 0.3,
                         overwrite: "auto"
                     });
                 }
-            }, { passive: true });
-
-            const hideMobilePreview = () => {
-                gsap.to(cursorReveal, {
-                    opacity: 0,
-                    scale: 0.8,
-                    rotation: -5,
+            });
+            card.addEventListener('mouseleave', () => {
+                cursorOutline.classList.remove('text-magnifying');
+                gsap.to(cursorOutline, {
+                    width: 32,
+                    height: 32,
+                    borderColor: 'rgba(0, 119, 182, 0.25)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
                     duration: 0.3,
-                    ease: "power2.inOut",
                     overwrite: "auto"
                 });
-            };
-
-            item.addEventListener('touchend', hideMobilePreview, { passive: true });
-            item.addEventListener('touchcancel', hideMobilePreview, { passive: true });
-            item.addEventListener('touchmove', hideMobilePreview, { passive: true });
+                gsap.to(cursorDot, {
+                    scale: 1,
+                    backgroundColor: 'rgba(12, 12, 12, 0.12)',
+                    duration: 0.3,
+                    overwrite: "auto"
+                });
+            });
         });
     }
 
@@ -545,10 +612,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.fonts.ready.then(() => {
         fitTextElements();
         if (typeof updateActiveBubble === 'function') updateActiveBubble();
+        if (typeof updateCredentialsActivePill === 'function') updateCredentialsActivePill();
     });
     window.addEventListener("resize", () => {
         fitTextElements();
         if (typeof updateActiveBubble === 'function') updateActiveBubble();
+        if (typeof updateCredentialsActivePill === 'function') updateCredentialsActivePill();
     });
 
     // Set initial states for main page elements to prevent flashing
@@ -764,11 +833,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Profile Scrub Text Reveal
     const scrubText = document.getElementById('scrub-text');
     if (scrubText) {
-        // Split text into words
-        const text = scrubText.innerText;
+        // Split text into words safely using textContent to ensure it works even if hidden on initial render
+        const text = scrubText.textContent.trim();
         scrubText.innerHTML = '';
-        text.split(' ').forEach(word => {
-            if (word.trim() !== '') {
+        text.split(/\s+/).forEach(word => {
+            if (word !== '') {
                 const span = document.createElement('span');
                 span.classList.add('scrub-word');
                 span.innerText = word + ' ';
@@ -783,9 +852,9 @@ document.addEventListener("DOMContentLoaded", () => {
             ease: "none",
             scrollTrigger: {
                 trigger: scrubText,
-                start: "top 80%",
-                end: "bottom 50%",
-                scrub: 0.5
+                start: "top 85%",
+                end: "bottom 60%",
+                scrub: 0.3
             }
         });
     }
@@ -828,8 +897,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // List Items (Honors and Certifications) Staggered Reveal
-    gsap.fromTo(".clean-list li",
+    // List Items (Credentials active tab on scroll) Staggered Reveal
+    gsap.fromTo(".credentials-tab-content.active li",
         { y: 30, opacity: 0 },
         {
             y: 0,
@@ -838,11 +907,106 @@ document.addEventListener("DOMContentLoaded", () => {
             stagger: 0.05,
             ease: "power2.out",
             scrollTrigger: {
-                trigger: ".honors-grid",
+                trigger: ".credentials-section",
                 start: "top 85%"
             }
         }
     );
+
+    // Credentials Segmented Control Tab Switcher Logic
+    const credentialsActivePill = document.querySelector('.credentials-active-pill');
+    const credentialsTabBtns = document.querySelectorAll('.credentials-tab-btn');
+
+    function updateCredentialsActivePill(instantly = false) {
+        const activeBtn = document.querySelector('.credentials-tab-btn.active');
+        if (activeBtn && credentialsActivePill) {
+            gsap.killTweensOf(credentialsActivePill);
+            gsap.to(credentialsActivePill, {
+                left: activeBtn.offsetLeft,
+                top: activeBtn.offsetTop,
+                width: activeBtn.offsetWidth,
+                height: activeBtn.offsetHeight,
+                duration: instantly ? 0 : 0.4,
+                ease: "power3.out"
+            });
+        }
+    }
+
+    if (credentialsTabBtns.length > 0) {
+        credentialsTabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('active')) return;
+
+                // Update active button class
+                credentialsTabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Animate active indicator pill
+                updateCredentialsActivePill();
+
+                // Switch active content tab
+                const tabName = btn.getAttribute('data-tab');
+                const currentActiveContent = document.querySelector('.credentials-tab-content.active');
+                const targetContent = document.getElementById(`tab-${tabName}`);
+
+                if (currentActiveContent && targetContent && currentActiveContent !== targetContent) {
+                    const currentItems = currentActiveContent.querySelectorAll('li');
+                    
+                    if (currentItems.length > 0) {
+                        gsap.killTweensOf(currentItems);
+                        gsap.to(currentItems, {
+                            opacity: 0,
+                            y: -15,
+                            duration: 0.25,
+                            stagger: 0.02,
+                            ease: "power2.in",
+                            onComplete: () => {
+                                currentActiveContent.classList.remove('active');
+                                targetContent.classList.add('active');
+                                
+                                const targetItems = targetContent.querySelectorAll('li');
+                                if (targetItems.length > 0) {
+                                    gsap.killTweensOf(targetItems);
+                                    gsap.set(targetItems, { opacity: 0, y: 20 });
+                                    gsap.to(targetItems, {
+                                        opacity: 1,
+                                        y: 0,
+                                        duration: 0.4,
+                                        stagger: 0.04,
+                                        ease: "power3.out"
+                                    });
+                                }
+                            }
+                        });
+                    } else {
+                        currentActiveContent.classList.remove('active');
+                        targetContent.classList.add('active');
+                        const targetItems = targetContent.querySelectorAll('li');
+                        if (targetItems.length > 0) {
+                            gsap.killTweensOf(targetItems);
+                            gsap.set(targetItems, { opacity: 0, y: 20 });
+                            gsap.to(targetItems, {
+                                opacity: 1,
+                                y: 0,
+                                duration: 0.4,
+                                stagger: 0.04,
+                                ease: "power3.out"
+                            });
+                        }
+                    }
+                }
+            });
+        });
+
+        // Initialize active tab pill layout immediately and also on resize / delays
+        updateCredentialsActivePill(true);
+        setTimeout(() => {
+            updateCredentialsActivePill(true);
+        }, 150);
+        setTimeout(() => {
+            updateCredentialsActivePill();
+        }, 500);
+    }
 
     // Nav link scroll spy — glow active section link
     const navLinks = document.querySelectorAll(".nav-link");
@@ -1501,22 +1665,274 @@ document.addEventListener("DOMContentLoaded", () => {
                     overlayText: ""
                 }
             ]
+        },
+        umintramurals: {
+            title: "UM Intramurals",
+            role: "Web Developer",
+            year: "2025",
+            desc: "A modern, interactive website for the University of Mindanao Intramurals program featuring stunning animations, responsive design, and comprehensive user management. Features a stunning hero section with animated text/floating elements, interactive sports cards, live tournament dashboards with real-time score updates, dynamic podium leaderboards, smooth navigation, and a robust authentication system (login/registration) with real-time field validation, password toggles, and countdown redirects.",
+            tags: ["HTML5", "CSS3", "Vanilla JavaScript", "Font Awesome", "Google Fonts (Poppins)"],
+            slides: [
+                {
+                    imgSrc: "assets/img/UM Intramurals images/landing.jpg",
+                    caption: "Landing Page: A visually striking portal for the sports program featuring cozy gradients, animated navigation, and quick access buttons to start the journey or view scheduling matrices.",
+                    overlayText: ""
+                },
+                {
+                    imgSrc: "assets/img/UM Intramurals images/sports.jpg",
+                    caption: "Sports Selection Module: An interactive sports hub displaying individual athletic categories (Basketball, Volleyball, Football, E-Sports, Table Tennis, Cheerdance) with dynamic card hover animations showing active teams and registered players.",
+                    overlayText: ""
+                },
+                {
+                    imgSrc: "assets/img/UM Intramurals images/leaderboard.jpg",
+                    caption: "Hall of Fame Leaderboard: A real-time scoring dashboard featuring a custom animated 3D podium layout for the top 3 colleges (CCE, CEE, CBAE) and a detailed grid view for general rankings.",
+                    overlayText: ""
+                }
+            ]
         }
     };
 
-    // Project click routing
-    const projectItemsList = document.querySelectorAll('.project-list-item');
-    projectItemsList.forEach(item => {
-        item.addEventListener('click', () => {
-            const projectId = item.getAttribute('data-project-id');
-            if (projectId) handleProjectClick(projectId);
+    // Projects 3D Coverflow Slider implementation
+    const sliderTrack = document.getElementById('projects-slider-track');
+    const sliderCards = Array.from(sliderTrack ? sliderTrack.children : []);
+    const sliderPrevBtn = document.getElementById('projects-prev-btn');
+    const sliderNextBtn = document.getElementById('projects-next-btn');
+    const sliderPagination = document.getElementById('projects-slider-pagination');
+    
+    let activeSliderIndex = 3; // Default to Pharmacy Triage in the center
+
+    // Build pagination dots
+    if (sliderPagination) {
+        sliderPagination.innerHTML = '';
+        
+        // Append active pill first
+        const activePill = document.createElement('div');
+        activePill.className = 'slider-dot-active-pill';
+        sliderPagination.appendChild(activePill);
+
+        sliderCards.forEach((card, index) => {
+            const dot = document.createElement('span');
+            dot.className = `slider-dot ${index === activeSliderIndex ? 'active' : ''}`;
+            dot.setAttribute('data-index', index);
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                setActiveSliderIndex(index);
+            });
+            sliderPagination.appendChild(dot);
+        });
+        
+        window.lastActiveSliderIndex = activeSliderIndex;
+    }
+
+    function setActiveSliderIndex(index) {
+        if (index < 0) index = 0;
+        if (index >= sliderCards.length) index = sliderCards.length - 1;
+        
+        activeSliderIndex = index;
+        updateProjectsSlider();
+    }
+
+    function updateProjectsSlider() {
+        const dots = sliderPagination ? Array.from(sliderPagination.querySelectorAll('.slider-dot')) : [];
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === activeSliderIndex);
+        });
+
+        // Sliding Active Pill logic
+        const activeDot = dots[activeSliderIndex];
+        const activePill = sliderPagination ? sliderPagination.querySelector('.slider-dot-active-pill') : null;
+        if (activeDot && activePill) {
+            const targetLeft = activeDot.offsetLeft;
+            const direction = activeSliderIndex - (window.lastActiveSliderIndex || 0);
+            window.lastActiveSliderIndex = activeSliderIndex;
+            
+            let stretchWidth = 24;
+            if (direction !== 0) {
+                gsap.killTweensOf(activePill);
+                
+                // Squash and stretch timeline for sliding dot transition
+                gsap.timeline()
+                    .to(activePill, {
+                        left: targetLeft - (direction > 0 ? 0 : 8),
+                        width: 36, // stretch
+                        duration: 0.2,
+                        ease: "power2.in"
+                    })
+                    .to(activePill, {
+                        left: targetLeft - 8,
+                        width: stretchWidth,
+                        duration: 0.35,
+                        ease: "elastic.out(1, 0.7)"
+                    });
+            } else {
+                gsap.to(activePill, {
+                    left: targetLeft - 8,
+                    width: stretchWidth,
+                    duration: 0.4,
+                    ease: "power3.out",
+                    overwrite: "auto"
+                });
+            }
+        }
+
+        sliderCards.forEach((card, index) => {
+            const offset = index - activeSliderIndex;
+            
+            card.classList.toggle('active', index === activeSliderIndex);
+            
+            let xVal = 0;
+            let scaleVal = 1;
+            let rotYVal = 0;
+            let zVal = 0;
+            let opacityVal = 0;
+            let zIndexVal = 0;
+            let pointerEvents = 'none';
+
+            const isMobile = window.innerWidth <= 768;
+
+            if (offset === 0) {
+                xVal = 0;
+                scaleVal = isMobile ? 1.0 : 1.15;
+                rotYVal = 0;
+                zVal = isMobile ? 0 : 120;
+                opacityVal = 1;
+                zIndexVal = 10;
+                pointerEvents = 'auto';
+            } else if (offset === -1) {
+                xVal = isMobile ? -130 : -210;
+                scaleVal = isMobile ? 0.82 : 0.88;
+                rotYVal = isMobile ? 10 : 20;
+                zVal = isMobile ? -50 : 0;
+                opacityVal = 0.65;
+                zIndexVal = 5;
+                pointerEvents = 'auto';
+            } else if (offset === 1) {
+                xVal = isMobile ? 130 : 210;
+                scaleVal = isMobile ? 0.82 : 0.88;
+                rotYVal = isMobile ? -10 : -20;
+                zVal = isMobile ? -50 : 0;
+                opacityVal = 0.65;
+                zIndexVal = 5;
+                pointerEvents = 'auto';
+            } else if (offset === -2) {
+                xVal = isMobile ? -230 : -390;
+                scaleVal = isMobile ? 0.68 : 0.72;
+                rotYVal = isMobile ? 15 : 35;
+                zVal = isMobile ? -100 : -80;
+                opacityVal = 0.25;
+                zIndexVal = 2;
+                pointerEvents = 'auto';
+            } else if (offset === 2) {
+                xVal = isMobile ? 230 : 390;
+                scaleVal = isMobile ? 0.68 : 0.72;
+                rotYVal = isMobile ? -15 : -35;
+                zVal = isMobile ? -100 : -80;
+                opacityVal = 0.25;
+                zIndexVal = 2;
+                pointerEvents = 'auto';
+            } else if (offset < -2) {
+                xVal = -500;
+                scaleVal = 0.55;
+                rotYVal = 45;
+                zVal = -150;
+                opacityVal = 0;
+                zIndexVal = 1;
+            } else if (offset > 2) {
+                xVal = 500;
+                scaleVal = 0.55;
+                rotYVal = -45;
+                zVal = -150;
+                opacityVal = 0;
+                zIndexVal = 1;
+            }
+
+            gsap.killTweensOf(card);
+            
+            let transformString = `translateX(${xVal}px) scale(${scaleVal}) rotateY(${rotYVal}deg) translateZ(${zVal}px)`;
+            
+            gsap.to(card, {
+                transform: transformString,
+                opacity: opacityVal,
+                duration: 0.8,
+                ease: "power4.out",
+                overwrite: "auto",
+                onStart: () => {
+                    card.style.zIndex = zIndexVal;
+                    card.style.pointerEvents = pointerEvents;
+                }
+            });
+        });
+    }
+
+    // Event listeners for prev/next buttons
+    if (sliderPrevBtn) {
+        sliderPrevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (activeSliderIndex > 0) {
+                setActiveSliderIndex(activeSliderIndex - 1);
+            } else {
+                setActiveSliderIndex(sliderCards.length - 1);
+            }
+        });
+    }
+
+    if (sliderNextBtn) {
+        sliderNextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (activeSliderIndex < sliderCards.length - 1) {
+                setActiveSliderIndex(activeSliderIndex + 1);
+            } else {
+                setActiveSliderIndex(0);
+            }
+        });
+    }
+
+    // Allow clicking on any card to bring it to center or open modal
+    sliderCards.forEach((card, index) => {
+        card.addEventListener('click', (e) => {
+            if (index === activeSliderIndex) {
+                const projectId = card.getAttribute('data-project-id');
+                if (projectId) openProjectPortal(projectId);
+            } else {
+                e.preventDefault();
+                e.stopPropagation();
+                setActiveSliderIndex(index);
+            }
         });
     });
 
-    // Project click routing
-    function handleProjectClick(projectId) {
-        openProjectPortal(projectId);
+    // Touch support for swiping
+    if (sliderTrack) {
+        let sliderStartX = 0;
+        let isSliderSwiping = false;
+        
+        sliderTrack.addEventListener('touchstart', (e) => {
+            sliderStartX = e.touches[0].clientX;
+            isSliderSwiping = true;
+        }, { passive: true });
+
+        sliderTrack.addEventListener('touchmove', (e) => {
+            if (!isSliderSwiping) return;
+            const diffX = e.touches[0].clientX - sliderStartX;
+            
+            if (Math.abs(diffX) > 60) { // Threshold
+                if (diffX > 0) {
+                    setActiveSliderIndex(activeSliderIndex - 1);
+                } else {
+                    setActiveSliderIndex(activeSliderIndex + 1);
+                }
+                isSliderSwiping = false;
+            }
+        }, { passive: true });
+
+        sliderTrack.addEventListener('touchend', () => {
+            isSliderSwiping = false;
+        });
     }
+
+    // Initialize slider position
+    updateProjectsSlider();
+    window.addEventListener('resize', updateProjectsSlider);
 
     // Portal Interactive Controls
     const portal = document.getElementById('project-portal');
@@ -1607,7 +2023,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (slide.imgSrc) {
                 mediaContent = `<img src="${slide.imgSrc}" alt="${slide.caption}" class="portal-slide-img" />`;
             } else {
-                mediaContent = getBlueprintSVG(projectId, idx);
+                let svgStr = getBlueprintSVG(projectId, idx);
+                if (svgStr) {
+                    svgStr = svgStr
+                        .replace(/fill="#0f172a"/g, 'fill="var(--text-color)"')
+                        .replace(/fill="#334155"/g, 'fill="var(--portal-desc-color)"')
+                        .replace(/fill="#475569"/g, 'fill="var(--portal-desc-color)"')
+                        .replace(/fill="#64748b"/g, 'fill="var(--portal-desc-color)"');
+                }
+                mediaContent = svgStr;
             }
 
             let overlayHTML = '';
@@ -2421,10 +2845,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Realign pills on screen resizing / display changes
     window.addEventListener('resize', () => {
         updateSegmentPills();
+        updateCredentialsActivePill(true);
     });
     
     // Initial realign once the fonts and animations load/reveal
-    setTimeout(updateSegmentPills, 500);
+    setTimeout(() => {
+        updateSegmentPills();
+        updateCredentialsActivePill(true);
+    }, 500);
 
     // Done initializing
 });

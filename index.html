@@ -372,26 +372,31 @@
         <section id="about" class="profile section" data-scroll-section>
             <div class="container">
                 <div class="profile-grid">
-                    <div class="profile-left sticky-col reveal-up">
+                    <div class="profile-left reveal-up">
                         <h2 class="editorial-title">PROFILE.</h2>
+                    </div>
+                    <div class="profile-right reveal-up">
                         <p class="editorial-desc">Detail-oriented Computer Science student with hands-on experience in
                             web development, database management, software engineering, and data analysis.</p>
                         <p class="editorial-desc">Currently pursuing my BS in Computer Science at the University of
                             Mindanao. Seeking an OJT opportunity to engineer resilient systems and craft bespoke digital
                             experiences.</p>
                     </div>
+                </div>
 
-                    <div class="profile-right reveal-up">
+                <div class="profile-grid mt-5">
+                    <div class="profile-left reveal-up">
                         <div class="scrub-reveal-text" id="scrub-text">
                             I specialize in bridging the gap between elegant design and complex system architecture.
                             With a relentless focus on precision, I architect solutions that are not only performant and
                             secure, but also deeply engaging.
                         </div>
+                    </div>
+                    <div class="profile-right reveal-up">
                         <div class="editorial-list">
                             <div class="list-item">
                                 <span class="list-label">Capabilities</span>
-                                <span class="list-value">Full-Stack Development, UI/UX Design, Data Analysis,
-                                    Cybersecurity, Machine Learning</span>
+                                <span class="list-value">Full-Stack Development (Frontend: HTML, CSS, JavaScript | Backend: PHP/Laravel, Python, C#), UI/UX Design, Data Analysis, Cybersecurity, Machine Learning</span>
                             </div>
                             <div class="list-item">
                                 <span class="list-label">Core Tech</span>
@@ -411,48 +416,156 @@
                     </div>
                 </div>
 
-                <div class="honors-grid mt-5">
-                    <div class="honors-col reveal-up">
-                        <h3 class="editorial-subtitle">Honors & Awards</h3>
-                        <ul class="clean-list">
-                            <li data-title="Top 2 - Dean's List, 2nd Year" data-issuer="University of Mindanao"
-                                data-year="2025" data-icon="fa-trophy"><span>2025</span> Top 2 - Dean's List, 2nd Year
-                            </li>
-                            <li data-title="Top 1 - Dean's List, 1st Year" data-issuer="University of Mindanao"
-                                data-year="2024" data-icon="fa-trophy"><span>2024</span> Top 1 - Dean's List, 1st Year
-                            </li>
-                            <li data-title="CHED - FPESFA Full Merit Scholar"
-                                data-issuer="Commission on Higher Education" data-year="Scholarship"
-                                data-icon="fa-award"><span>Award</span> CHED - FPESFA Full Merit Scholar</li>
-                            <li data-title="UM Honor Society Scholar" data-issuer="University of Mindanao"
-                                data-year="Honorary" data-icon="fa-user-graduate"><span>Award</span> UM Honor Society
-                                Scholar</li>
-                            <li data-title="Former EBSU - STEP Scholar" data-issuer="EBSU" data-year="Scholarship"
-                                data-icon="fa-award"><span>Award</span> Former EBSU - STEP Scholar</li>
-                            <li data-title="Best Capstone Project Presenter" data-issuer="University of Mindanao"
-                                data-year="2023" data-icon="fa-award"><span>2023</span> Best Capstone Project Presenter
-                            </li>
-                            <li data-title="Best Robotic Prototype" data-issuer="University of Mindanao"
-                                data-year="2023" data-icon="fa-robot"><span>2023</span> Best Robotic Prototype</li>
-                        </ul>
+                <div class="credentials-section mt-5 reveal-up">
+                    <div class="credentials-tab-container">
+                        <div class="credentials-segmented-control glass-panel">
+                            <div class="credentials-active-pill"></div>
+                            <button class="credentials-tab-btn active" data-tab="certifications">
+                                <i class="fa-solid fa-award"></i>
+                                <span>Certifications</span>
+                            </button>
+                            <button class="credentials-tab-btn" data-tab="achievements">
+                                <i class="fa-solid fa-trophy"></i>
+                                <span>Achievements</span>
+                            </button>
+                            <button class="credentials-tab-btn" data-tab="scholarships">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                                <span>Scholarships</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="honors-col reveal-up">
-                        <h3 class="editorial-subtitle">Selected Certifications</h3>
-                        <ul class="clean-list">
-                            <li data-title="IT Specialist in Network Security" data-issuer="Certiport" data-year="2025"
-                                data-icon="fa-shield-halved"><span>Certiport</span> IT Specialist in Network Security
-                            </li>
-                            <li data-title="IT Specialist in Databases" data-issuer="Certiport" data-year="2024"
-                                data-icon="fa-database"><span>Certiport</span> IT Specialist in Databases</li>
-                            <li data-title="IT Specialist in Java" data-issuer="Certiport" data-year="2024"
-                                data-icon="fa-code"><span>Certiport</span> IT Specialist in Java</li>
-                            <li data-title="Machine Learning with Python" data-issuer="Alison" data-year="2024"
-                                data-icon="fa-brain"><span>Alison</span> Machine Learning with Python</li>
-                            <li data-title="Website Development" data-issuer="Alison" data-year="2023"
-                                data-icon="fa-laptop-code"><span>Alison</span> Website Development</li>
-                            <li data-title="Programming using C#" data-issuer="Alison" data-year="2023"
-                                data-icon="fa-hashtag"><span>Alison</span> Programming using C#</li>
-                        </ul>
+
+                    <div class="credentials-content-viewport">
+                        <!-- Certifications Tab Content -->
+                        <div class="credentials-tab-content active" id="tab-certifications">
+                            <ul class="clean-list">
+                                <li class="cert-item hover-target" data-verify="true" data-title="IT Specialist in Network Security" data-issuer="Certiport" data-year="2026" data-icon="fa-shield-halved">
+                                    <span>2026</span>
+                                    <div class="item-detail">
+                                        <strong>Information Technology Specialist in Network Security</strong>
+                                        <p>Certiport</p>
+                                    </div>
+                                    <span class="verify-badge"><i class="fa-solid fa-circle-check"></i> <span class="verify-text">VERIFIED</span></span>
+                                </li>
+                                <li class="cert-item hover-target" data-verify="true" data-title="IT Specialist in Databases" data-issuer="Certiport" data-year="2025" data-icon="fa-database">
+                                    <span>2025</span>
+                                    <div class="item-detail">
+                                        <strong>Information Technology Specialist in Databases</strong>
+                                        <p>Certiport</p>
+                                    </div>
+                                    <span class="verify-badge"><i class="fa-solid fa-circle-check"></i> <span class="verify-text">VERIFIED</span></span>
+                                </li>
+                                <li class="cert-item hover-target" data-verify="true" data-title="Diploma in Machine Learning with Python" data-issuer="Alison" data-year="2025" data-icon="fa-brain">
+                                    <span>2025</span>
+                                    <div class="item-detail">
+                                        <strong>Diploma in Machine Learning with Python</strong>
+                                        <p>Alison</p>
+                                    </div>
+                                    <span class="verify-badge"><i class="fa-solid fa-circle-check"></i> <span class="verify-text">VERIFIED</span></span>
+                                </li>
+                                <li class="cert-item hover-target" data-verify="true" data-title="IT Specialist in Java" data-issuer="Certiport" data-year="2024" data-icon="fa-code">
+                                    <span>2024</span>
+                                    <div class="item-detail">
+                                        <strong>Information Technology Specialist in Java</strong>
+                                        <p>Certiport</p>
+                                    </div>
+                                    <span class="verify-badge"><i class="fa-solid fa-circle-check"></i> <span class="verify-text">VERIFIED</span></span>
+                                </li>
+                                <li class="cert-item hover-target" data-verify="true" data-title="Diploma in Website Development" data-issuer="Alison" data-year="2024" data-icon="fa-laptop-code">
+                                    <span>2024</span>
+                                    <div class="item-detail">
+                                        <strong>Diploma in Website Development</strong>
+                                        <p>Alison</p>
+                                    </div>
+                                    <span class="verify-badge"><i class="fa-solid fa-circle-check"></i> <span class="verify-text">VERIFIED</span></span>
+                                </li>
+                                <li class="cert-item hover-target" data-verify="true" data-title="Diploma in Programming using C#" data-issuer="Alison" data-year="2024" data-icon="fa-hashtag">
+                                    <span>2024</span>
+                                    <div class="item-detail">
+                                        <strong>Diploma in Programming using C#</strong>
+                                        <p>Alison</p>
+                                    </div>
+                                    <span class="verify-badge"><i class="fa-solid fa-circle-check"></i> <span class="verify-text">VERIFIED</span></span>
+                                </li>
+                                <li class="cert-item hover-target" data-verify="true" data-title="Diploma in Python Programming" data-issuer="Alison" data-year="2023" data-icon="fa-brands fa-python">
+                                    <span>2023</span>
+                                    <div class="item-detail">
+                                        <strong>Diploma in Python Programming</strong>
+                                        <p>Alison</p>
+                                    </div>
+                                    <span class="verify-badge"><i class="fa-solid fa-circle-check"></i> <span class="verify-text">VERIFIED</span></span>
+                                </li>
+                                <li class="cert-item hover-target" data-verify="true" data-title="Diploma in IT Management" data-issuer="Alison" data-year="2023" data-icon="fa-folder-open">
+                                    <span>2023</span>
+                                    <div class="item-detail">
+                                        <strong>Diploma in IT Management</strong>
+                                        <p>Alison</p>
+                                    </div>
+                                    <span class="verify-badge"><i class="fa-solid fa-circle-check"></i> <span class="verify-text">VERIFIED</span></span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Achievements Tab Content -->
+                        <div class="credentials-tab-content" id="tab-achievements">
+                            <ul class="clean-list">
+                                <li class="achievement-item" data-issuer="University of Mindanao" data-year="Jul 2025" data-icon="fa-trophy">
+                                    <span>Jul 2025</span>
+                                    <div class="item-detail">
+                                        <strong>Ranked Top 2 in the College of Computing Education Dean’s List (2nd Year)</strong>
+                                        <p>University of Mindanao</p>
+                                    </div>
+                                </li>
+                                <li class="achievement-item" data-issuer="University of Mindanao" data-year="May 2024" data-icon="fa-trophy">
+                                    <span>May 2024</span>
+                                    <div class="item-detail">
+                                        <strong>Ranked Top 1 in the College of Computing Education Dean’s List (1st Year)</strong>
+                                        <p>University of Mindanao</p>
+                                    </div>
+                                </li>
+                                <li class="achievement-item" data-issuer="Mintal Comprehensive Senior High School" data-year="Jun 2023" data-icon="fa-award">
+                                    <span>Jun 2023</span>
+                                    <div class="item-detail">
+                                        <strong>Recognized as Best Capstone Project Presenter (2023)</strong>
+                                        <p>Mintal Comprehensive Senior High School</p>
+                                    </div>
+                                </li>
+                                <li class="achievement-item" data-issuer="Mintal Comprehensive Senior High School" data-year="Jun 2023" data-icon="fa-robot">
+                                    <span>Jun 2023</span>
+                                    <div class="item-detail">
+                                        <strong>Awarded Best Robotic Prototype (2023)</strong>
+                                        <p>Mintal Comprehensive Senior High School</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Scholarships Tab Content -->
+                        <div class="credentials-tab-content" id="tab-scholarships">
+                            <ul class="clean-list">
+                                <li class="scholarship-item" data-issuer="Commission on Higher Education (CHED)" data-year="2024-Pres" data-icon="fa-graduation-cap">
+                                    <span>2024-Pres</span>
+                                    <div class="item-detail">
+                                        <strong>Commission on Higher Education (CHED) FPESFA Full-Merit Scholar</strong>
+                                        <p>Aug 2024 - Present</p>
+                                    </div>
+                                </li>
+                                <li class="scholarship-item" data-issuer="University of Mindanao" data-year="2024-Pres" data-icon="fa-medal">
+                                    <span>2024-Pres</span>
+                                    <div class="item-detail">
+                                        <strong>University of Mindanao Honor Society Scholar (Category A)</strong>
+                                        <p>Aug 2024 - Present</p>
+                                    </div>
+                                </li>
+                                <li class="scholarship-item" data-issuer="Educational Benefit System Unit (EBSU)" data-year="2023-2024" data-icon="fa-clock-rotate-left">
+                                    <span>2023-2024</span>
+                                    <div class="item-detail">
+                                        <strong>Former Educational Benefit System Unit (EBSU) - STEP Scholar (Category A)</strong>
+                                        <p>Aug 2023 - May 2024</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -484,66 +597,112 @@
                     <div class="line"></div>
                 </div>
 
-                <div class="project-list reveal-up">
-                    <!-- Project 1: PhishVote -->
-                    <div class="project-list-item hover-target" data-project-id="phishvote"
-                        data-image="assets/img/PhishVote images/PV1.jpg">
-                        <div class="project-list-info">
-                            <span class="project-list-year">2026</span>
-                            <span class="project-list-role">Lead Researcher</span>
+                <div class="projects-slider-wrapper reveal-up">
+                    <button class="slider-arrow prev-arrow hover-target" id="projects-prev-btn" aria-label="Previous Project">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <div class="slider-viewport">
+                        <div class="slider-track" id="projects-slider-track">
+                            <!-- Project Card 1: PhishVote -->
+                            <div class="project-slide-card hover-target" data-project-id="phishvote">
+                                <div class="card-image-wrapper">
+                                    <img src="assets/img/PhishVote images/PV1.jpg" alt="PhishVote" class="card-bg-img">
+                                    <div class="card-glass-overlay"></div>
+                                </div>
+                                <div class="card-content-overlay">
+                                    <span class="card-project-year">2026</span>
+                                    <h3 class="card-project-name">phishvote</h3>
+                                    <span class="card-project-role">Lead Researcher</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Project Card 2: FurryTails -->
+                            <div class="project-slide-card hover-target" data-project-id="furrytails">
+                                <div class="card-image-wrapper">
+                                    <img src="assets/img/FurryTails images/landing page.jpg" alt="FurryTails" class="card-bg-img">
+                                    <div class="card-glass-overlay"></div>
+                                </div>
+                                <div class="card-content-overlay">
+                                    <span class="card-project-year">2025</span>
+                                    <h3 class="card-project-name">furrytails</h3>
+                                    <span class="card-project-role">Full-Stack Dev</span>
+                                </div>
+                            </div>
+
+                            <!-- Project Card 3: Insightful -->
+                            <div class="project-slide-card hover-target" data-project-id="insightful">
+                                <div class="card-image-wrapper">
+                                    <img src="assets/img/Insightful images/splash screen.png" alt="Insightful" class="card-bg-img">
+                                    <div class="card-glass-overlay"></div>
+                                </div>
+                                <div class="card-content-overlay">
+                                    <span class="card-project-year">2024</span>
+                                    <h3 class="card-project-name">insightful</h3>
+                                    <span class="card-project-role">Web Developer</span>
+                                </div>
+                            </div>
+
+                            <!-- Project Card 4: Pharmacy Triage -->
+                            <div class="project-slide-card hover-target" data-project-id="pharmacytriage">
+                                <div class="card-image-wrapper">
+                                    <img src="assets/img/Pharmacy Triage images/Model Design Layout.png" alt="Pharmacy Triage" class="card-bg-img">
+                                    <div class="card-glass-overlay"></div>
+                                </div>
+                                <div class="card-content-overlay">
+                                    <span class="card-project-year">2026</span>
+                                    <h3 class="card-project-name">pharmacy triage</h3>
+                                    <span class="card-project-role">Simulation Eng</span>
+                                </div>
+                            </div>
+
+                            <!-- Project Card 5: Spaswab -->
+                            <div class="project-slide-card hover-target" data-project-id="spaswab">
+                                <div class="card-image-wrapper">
+                                    <img src="assets/img/SPASWAB images/spaswab prototype.jpg" alt="Spaswab" class="card-bg-img">
+                                    <div class="card-glass-overlay"></div>
+                                </div>
+                                <div class="card-content-overlay">
+                                    <span class="card-project-year">2023</span>
+                                    <h3 class="card-project-name">spaswab</h3>
+                                    <span class="card-project-role">IoT Programmer</span>
+                                </div>
+                            </div>
+
+                            <!-- Project Card 6: Physics Legends -->
+                            <div class="project-slide-card hover-target" data-project-id="physicslegends">
+                                <div class="card-image-wrapper">
+                                    <img src="assets/img/Physics Legends images/main menu.jpg" alt="Physics Legends" class="card-bg-img">
+                                    <div class="card-glass-overlay"></div>
+                                </div>
+                                <div class="card-content-overlay">
+                                    <span class="card-project-year">2026</span>
+                                    <h3 class="card-project-name">physics legends</h3>
+                                    <span class="card-project-role">Lead Developer</span>
+                                </div>
+                            </div>
+
+                            <!-- Project Card 7: UM Intramurals -->
+                            <div class="project-slide-card hover-target" data-project-id="umintramurals">
+                                <div class="card-image-wrapper">
+                                    <img src="assets/img/UM Intramurals images/landing.jpg" alt="UM Intramurals" class="card-bg-img">
+                                    <div class="card-glass-overlay"></div>
+                                </div>
+                                <div class="card-content-overlay">
+                                    <span class="card-project-year">2025</span>
+                                    <h3 class="card-project-name">um intramurals</h3>
+                                    <span class="card-project-role">Web Developer</span>
+                                </div>
+                            </div>
                         </div>
-                        <h3 class="project-list-name">PhishVote</h3>
                     </div>
 
-                    <!-- Project 2: FurryTails -->
-                    <div class="project-list-item hover-target" data-project-id="furrytails"
-                        data-image="assets/img/FurryTails images/landing page.jpg">
-                        <div class="project-list-info">
-                            <span class="project-list-year">2025</span>
-                            <span class="project-list-role">Full-Stack Developer</span>
-                        </div>
-                        <h3 class="project-list-name">FurryTails</h3>
-                    </div>
+                    <button class="slider-arrow next-arrow hover-target" id="projects-next-btn" aria-label="Next Project">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
 
-                    <!-- Project 3: INSIGHTFUL -->
-                    <div class="project-list-item hover-target" data-project-id="insightful"
-                        data-image="assets/img/Insightful images/splash screen.png">
-                        <div class="project-list-info">
-                            <span class="project-list-year">2024</span>
-                            <span class="project-list-role">Web Developer</span>
-                        </div>
-                        <h3 class="project-list-name">Insightful</h3>
-                    </div>
-
-                    <!-- Project 4: Pharmacy Triage -->
-                    <div class="project-list-item hover-target" data-project-id="pharmacytriage"
-                        data-image="assets/img/Pharmacy Triage images/Model Design Layout.png">
-                        <div class="project-list-info">
-                            <span class="project-list-year">2026</span>
-                            <span class="project-list-role">Lead Data Analyst</span>
-                        </div>
-                        <h3 class="project-list-name">Pharmacy Triage</h3>
-                    </div>
-
-                    <!-- Project 5: SPASWAB -->
-                    <div class="project-list-item hover-target" data-project-id="spaswab"
-                        data-image="assets/img/SPASWAB images/spaswab prototype.jpg">
-                        <div class="project-list-info">
-                            <span class="project-list-year">2023</span>
-                            <span class="project-list-role">Researcher & Programmer</span>
-                        </div>
-                        <h3 class="project-list-name">Spaswab</h3>
-                    </div>
-
-                    <!-- Project 6: Physics Legends -->
-                    <div class="project-list-item hover-target" data-project-id="physicslegends"
-                        data-image="assets/img/Physics Legends images/main menu.jpg">
-                        <div class="project-list-info">
-                            <span class="project-list-year">2026</span>
-                            <span class="project-list-role">Lead Developer</span>
-                        </div>
-                        <h3 class="project-list-name">Physics Legends</h3>
-                    </div>
+                    <!-- Slider Pagination Dots -->
+                    <div class="slider-pagination-dots" id="projects-slider-pagination"></div>
                 </div>
             </div>
         </section>
