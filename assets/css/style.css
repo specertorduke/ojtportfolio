@@ -2442,12 +2442,13 @@ main[data-scroll-container] {
     color: var(--text-color);
     text-decoration: none;
     font-size: 1.5rem;
-    transition: background 0.3s, color 0.3s;
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 
 .social-link:hover {
     background: var(--text-color);
     color: var(--bg-color);
+    border-color: var(--text-color);
 }
 
 .footer {

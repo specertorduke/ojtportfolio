@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // VisionOS snapping/morphing interaction for buttons, links, etc.
-        const snapElements = document.querySelectorAll('.social-link, #portal-close-btn, .slideshow-nav-btn, .carousel-btn, .slider-dot');
+        const snapElements = document.querySelectorAll('#portal-close-btn, .slideshow-nav-btn, .carousel-btn, .slider-dot');
 
         snapElements.forEach(elem => {
             elem.addEventListener('mouseenter', () => {
@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // Hide custom pointer on navbar links to avoid cluttering
-        const occludedElements = document.querySelectorAll('.nav-link, .nav-logo a, .btn-explore');
+        const occludedElements = document.querySelectorAll('.nav-link, .nav-logo a, .btn-explore, .social-link');
         occludedElements.forEach(el => {
             el.addEventListener('mouseenter', () => {
                 gsap.to(cursorOutline, { opacity: 0, duration: 0.2, overwrite: "auto" });
