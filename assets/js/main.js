@@ -313,105 +313,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     gsap.to(cursorDot, { opacity: 1, duration: 0.3, overwrite: "auto" });
                 });
 
-                // Redirect to LinkedIn in new tab when clicked (or toggle modal preview on mobile)
-                item.addEventListener('click', (e) => {
-                    if (window.innerWidth <= 992) {
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        // If user clicked a different cert item, switch the active item and show details
-                        if (lastClickedCertItem !== item) {
-                            lastClickedCertItem = item;
-                            isCertPreviewActiveMobile = true;
-
-                            // Update content
-                            if (cardTitle) cardTitle.textContent = item.getAttribute('data-title') || '';
-                            if (cardIssuer) cardIssuer.textContent = item.getAttribute('data-issuer') || '';
-                            if (cardYear) cardYear.textContent = item.getAttribute('data-year') || '';
-                            if (cardIcon) {
-                                const iconClass = item.getAttribute('data-icon') || 'fa-award';
-                                cardIcon.className = `fa-solid ${iconClass} cert-card-icon`;
-                            }
-                            if (cardBadge) {
-                                cardBadge.innerHTML = '<i class="fa-brands fa-linkedin"></i> TAP AGAIN TO VERIFY';
-                                cardBadge.style.color = '#00b4d8';
-                                cardBadge.style.borderColor = 'rgba(0, 180, 216, 0.4)';
-                            }
-
-                            // Clean any inline transforms from cursor tracking
-                            gsap.set(certPreview, {
-                                xPercent: -50,
-                                yPercent: -50,
-                                x: 0,
-                                y: 0,
-                                rotationX: 0,
-                                rotationY: 0
-                            });
-
-                            // Animate card entrance
-                            gsap.to(certPreview, {
-                                opacity: 1,
-                                scale: 1,
-                                duration: 0.4,
-                                ease: "power3.out"
-                            });
-                        } else {
-                            // Tap again to verify credential
-                            window.open('https://www.linkedin.com/in/zander-duhaylungsod-308846315/', '_blank');
-                            
-                            // Hide preview card
-                            gsap.to(certPreview, {
-                                opacity: 0,
-                                scale: 0.8,
-                                duration: 0.3,
-                                ease: "power3.inOut"
-                            });
-                            lastClickedCertItem = null;
-                            isCertPreviewActiveMobile = false;
-                        }
-                    } else {
-                        // Desktop immediate redirect
-                        window.open('https://www.linkedin.com/in/zander-duhaylungsod-308846315/', '_blank');
-                    }
+                // Direct click to verify credential
+                item.addEventListener('click', () => {
+                    const url = item.getAttribute('data-url') || 'https://www.linkedin.com/in/zander-duhaylungsod-308846315/';
+                    window.open(url, '_blank');
                 });
-            });
-
-            // Let tapping the preview card itself also redirect to LinkedIn on mobile
-            certPreview.addEventListener('click', (e) => {
-                if (window.innerWidth <= 992 && isCertPreviewActiveMobile) {
-                    window.open('https://www.linkedin.com/in/zander-duhaylungsod-308846315/', '_blank');
-                    gsap.to(certPreview, {
-                        opacity: 0,
-                        scale: 0.8,
-                        duration: 0.3,
-                        ease: "power3.inOut"
-                    });
-                    lastClickedCertItem = null;
-                    isCertPreviewActiveMobile = false;
-                }
-            });
-
-            // Tap outside to close preview modal on mobile devices
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 992 && isCertPreviewActiveMobile) {
-                    if (!e.target.closest('.cert-item') && !e.target.closest('#cert-preview')) {
-                        gsap.to(certPreview, {
-                            opacity: 0,
-                            scale: 0.8,
-                            duration: 0.3,
-                            ease: "power3.inOut"
-                        });
-                        lastClickedCertItem = null;
-                        isCertPreviewActiveMobile = false;
-                    }
-                }
             });
         }
         
         // Initial binding
-        if (certPreview) {
-            bindCertHoverListeners();
-        }
+        bindCertHoverListeners();
 
         // True optical magnifying loupe triggers for text elements
         const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, .editorial-subtitle, .lead');
