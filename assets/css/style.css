@@ -68,34 +68,54 @@ body::after {
     z-index: 99999; /* overlay everything to bind UI elements visually */
 }
 
-/* Custom Cursor (Apple iPadOS/VisionOS Snapping cursor) */
+/* Real Liquid Glass Droplet Lens (Constant 200px Crystal Glass) */
 .cursor-dot {
     display: none;
     position: fixed;
     top: 0; left: 0;
-    width: 16px; height: 16px;
-    background-color: rgba(12, 12, 12, 0.12);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    width: 6px; height: 6px;
+    background-color: #ffffff;
     border-radius: 50%;
     pointer-events: none;
     z-index: 99999;
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 0 0 15px rgba(255, 255, 255, 0.6);
+    transition: opacity 0.2s ease;
 }
+
 .cursor-outline {
     display: none;
     position: fixed;
     top: 0; left: 0;
-    width: 32px; height: 32px;
-    border: 1px solid rgba(0, 119, 182, 0.25);
-    border-radius: 50%;
+    width: 200px !important;
+    height: 200px !important;
+    border-radius: 50% !important;
     pointer-events: none;
     z-index: 99998;
     transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(1.5px);
-    -webkit-backdrop-filter: blur(1.5px);
+    box-sizing: border-box;
+
+    /* Crisp Seamless Pure Glass Optics */
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    background: radial-gradient(
+        circle at 40% 25%,
+        rgba(255, 255, 255, 0.5) 0%,
+        rgba(255, 255, 255, 0.15) 35%,
+        rgba(255, 255, 255, 0.03) 65%,
+        rgba(0, 0, 0, 0.15) 100%
+    );
+    backdrop-filter: blur(2px) brightness(1.08) contrast(1.05) url(#glass-droplet-lens);
+    -webkit-backdrop-filter: blur(2px) brightness(1.08) contrast(1.05);
+
+    /* Smooth 360° Glass Rim Specular Highlight & Outer Shadow */
+    box-shadow:
+        0 28px 55px rgba(0, 0, 0, 0.22),
+        0 10px 22px rgba(0, 0, 0, 0.1),
+        inset 0 0 25px rgba(255, 255, 255, 0.4),
+        inset 0 0 8px rgba(255, 255, 255, 0.8),
+        inset 0 -8px 20px rgba(0, 0, 0, 0.15);
+
+    transform-origin: center center;
 }
 .cursor-image-reveal {
     position: fixed;
@@ -2540,29 +2560,7 @@ main[data-scroll-container] {
     }
 }
 
-/* Magnifying Glass Cursor Stem */
-.cursor-outline::after {
-    content: '';
-    position: absolute;
-    bottom: -3px;
-    right: -3px;
-    width: 2px;
-    height: 8px;
-    background-color: var(--accent-color);
-    transform: rotate(-45deg);
-    transform-origin: top left;
-    transition: transform 0.25s ease, opacity 0.25s ease;
-}
 
-.cursor-outline.snapped::after {
-    transform: rotate(-45deg) scale(0);
-    opacity: 0;
-}
-
-.cursor-outline.inspecting::after {
-    transform: rotate(-45deg) scale(0.7) translate(2px, 2px);
-    opacity: 0.8;
-}
 
 /* Floating Glass Certificate Preview Card */
 .cert-preview {

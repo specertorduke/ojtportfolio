@@ -76,12 +76,22 @@ document.addEventListener("DOMContentLoaded", () => {
             gsap.set(certPreview, { xPercent: -50, yPercent: -50, transformOrigin: "center center" });
         }
 
-        // Outer ring snappy follow (only active when not snapped)
+        // Outer ring 3D glass orb tracking (stays a constant perfect circle)
         gsap.ticker.add(() => {
             if (!currentSnapEl) {
-                followerX += (mouseX - followerX) * 0.35;
-                followerY += (mouseY - followerY) * 0.35;
-                gsap.set(cursorOutline, { x: followerX, y: followerY });
+                const dx = (mouseX - followerX);
+                const dy = (mouseY - followerY);
+                
+                followerX += dx * 0.22;
+                followerY += dy * 0.22;
+
+                gsap.set(cursorOutline, { 
+                    x: followerX, 
+                    y: followerY,
+                    rotation: 0,
+                    scaleX: 1,
+                    scaleY: 1
+                });
             }
 
             // Cert card tracking with inertia and 3D tilt
@@ -411,14 +421,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (el.closest('.btn, .nav-link, .social-link, #portal-close-btn, .slideshow-nav-btn, .carousel-btn, .clean-list li')) return;
 
                 cursorOutline.classList.add('text-magnifying');
-                gsap.to(cursorOutline, {
-                    width: 56,
-                    height: 56,
-                    borderColor: 'rgba(0, 119, 182, 0.4)',
-                    backgroundColor: 'rgba(0, 119, 182, 0.03)',
-                    duration: 0.3,
-                    overwrite: "auto"
-                });
                 gsap.to(cursorDot, {
                     scale: 0.7,
                     backgroundColor: 'var(--accent-color)',
@@ -430,14 +432,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (el.closest('.btn, .nav-link, .social-link, #portal-close-btn, .slideshow-nav-btn, .carousel-btn, .clean-list li')) return;
 
                 cursorOutline.classList.remove('text-magnifying');
-                gsap.to(cursorOutline, {
-                    width: 32,
-                    height: 32,
-                    borderColor: 'rgba(0, 119, 182, 0.25)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    duration: 0.3,
-                    overwrite: "auto"
-                });
                 gsap.to(cursorDot, {
                     scale: 1,
                     backgroundColor: 'rgba(12, 12, 12, 0.12)',
@@ -447,19 +441,11 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // Project Cards custom cursor hover styling (no need for image reveal hover)
+        // Project Cards custom cursor hover styling
         projectItems.forEach(card => {
             card.addEventListener('mouseenter', () => {
                 if (card.classList.contains('active')) {
                     cursorOutline.classList.add('text-magnifying');
-                    gsap.to(cursorOutline, {
-                        width: 70,
-                        height: 70,
-                        borderColor: 'rgba(0, 180, 216, 0.5)',
-                        backgroundColor: 'rgba(0, 180, 216, 0.05)',
-                        duration: 0.3,
-                        overwrite: "auto"
-                    });
                     gsap.to(cursorDot, {
                         scale: 0.5,
                         backgroundColor: 'var(--accent-color)',
@@ -470,14 +456,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             card.addEventListener('mouseleave', () => {
                 cursorOutline.classList.remove('text-magnifying');
-                gsap.to(cursorOutline, {
-                    width: 32,
-                    height: 32,
-                    borderColor: 'rgba(0, 119, 182, 0.25)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    duration: 0.3,
-                    overwrite: "auto"
-                });
                 gsap.to(cursorDot, {
                     scale: 1,
                     backgroundColor: 'rgba(12, 12, 12, 0.12)',

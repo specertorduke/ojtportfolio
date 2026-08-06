@@ -42,6 +42,16 @@
         </div>
     </div>
 
+    <!-- SVG Liquid Glass Refraction Defs -->
+    <svg class="liquid-glass-svg-defs" aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none;">
+        <defs>
+            <filter id="liquid-glass-lens" x="-50%" y="-50%" width="200%" height="200%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
     <!-- Custom Cursor & Reveal -->
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
