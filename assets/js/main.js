@@ -2063,7 +2063,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const sketchRight = document.querySelector('.sketch-right');
  
     if (lockscreenPortal && lockscreenGlass) {
-        // Clock and Date updates
+        // Clock and Date updates (12-hour format)
         function updateLockscreenClock() {
             const clockEl = document.getElementById('lockscreen-clock');
             const dateEl = document.getElementById('lockscreen-date');
@@ -2071,13 +2071,18 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!clockEl) return;
             
             const now = new Date();
-            let hours = now.getHours();
+            let rawHours = now.getHours();
             let minutes = now.getMinutes();
-            hours = hours < 10 ? '0' + hours : hours;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
+            let hours12 = rawHours % 12;
+            hours12 = hours12 ? hours12 : 12; // 0 becomes 12
             
-            clockEl.textContent = `${hours}:${minutes}`;
-            if (statusTimeEl) statusTimeEl.textContent = `${hours}:${minutes}`;
+            let displayHours = hours12 < 10 ? '0' + hours12 : hours12;
+            let displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+            
+            const formattedTime = `${displayHours}:${displayMinutes}`;
+            
+            clockEl.textContent = formattedTime;
+            if (statusTimeEl) statusTimeEl.textContent = formattedTime;
             
             const options = { weekday: 'long', month: 'long', day: 'numeric' };
             if (dateEl) dateEl.textContent = now.toLocaleDateString('en-US', options);

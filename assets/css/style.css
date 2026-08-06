@@ -230,22 +230,56 @@ body.loading .scroll-indicator {
     100% { transform: translate(10vw, 10vh) scale(1.2); }
 }
 
-/* Glassmorphism Utilities */
-.liquid-glass-card, .glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid var(--glass-border);
+/* Real 3D Liquid Glass Component System */
+.liquid-glass-card, 
+.glass-panel,
+.navbar,
+.btn-explore,
+.credentials-segmented-control,
+.theme-controls-panel,
+.brush-controls-panel,
+.brush-toast-notification,
+.eye-protection-widget,
+.portal-container {
+    position: relative;
+    background: radial-gradient(
+        circle at 38% 18%,
+        rgba(255, 255, 255, 0.42) 0%,
+        rgba(255, 255, 255, 0.15) 30%,
+        rgba(255, 255, 255, 0.03) 65%,
+        rgba(0, 0, 0, 0.12) 100%
+    );
+    backdrop-filter: blur(25px) saturate(190%) contrast(105%);
+    -webkit-backdrop-filter: blur(25px) saturate(190%) contrast(105%);
+    border: 1px solid rgba(255, 255, 255, 0.65) !important;
     box-shadow: 
-        var(--glass-shadow),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        inset 0 0 20px rgba(255, 255, 255, 0.05);
+        0 24px 50px rgba(0, 0, 0, 0.16),
+        0 8px 18px rgba(0, 0, 0, 0.08),
+        inset 0 2px 4px rgba(255, 255, 255, 0.85),
+        inset 0 -4px 10px rgba(0, 0, 0, 0.15),
+        inset 0 0 25px rgba(255, 255, 255, 0.25) !important;
     border-radius: 24px;
     padding: 40px;
     transition: background 0.8s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.8s cubic-bezier(0.16, 1, 0.3, 1),
                 box-shadow 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Subtle Top Glass Specular Arc Glare on Liquid Components */
+.liquid-glass-card::before,
+.glass-panel::before,
+.portal-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.9), transparent);
+    pointer-events: none;
+    z-index: 10;
+}
+
 @media (max-width: 768px) {
     .liquid-glass-card, .glass-panel { padding: 25px; }
 }
@@ -809,13 +843,16 @@ body.loading .scroll-indicator {
     overflow: hidden;
 }
 
-/* Allow 3D character animation on hero title wrapper */
+/* Allow 3D character animation & full drop-shadows on hero elements */
 .hero-title .hero-name-line {
     perspective: 600px;
 }
 
-.reveal-text:has(.hero-title) {
-    overflow: visible;
+.reveal-text:has(.hero-title),
+.reveal-text:has(.hero-cta),
+.reveal-text:has(.btn-explore),
+.hero-cta {
+    overflow: visible !important;
 }
 
 .subtitle {
